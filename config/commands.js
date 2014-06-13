@@ -826,25 +826,19 @@ var commands = exports.commands = {
 
 	rule: 'rules',
 	rules: function (target, room, user) {
-		if (!target) {
-			if (!this.canBroadcast()) return;
-			this.sendReplyBox("Please follow the rules:<br />" +
-				(room.rulesLink ? "- <a href=\"" + Tools.escapeHTML(room.rulesLink) + "\">" + Tools.escapeHTML(room.title) + " room rules</a><br />" : "") +
-				"- <a href=\"http://pokemonshowdown.com/rules\">" + (room.rulesLink ? "Global rules" : "Rules") + "</a>");
-			return;
-		}
-		if (!this.can('declare', room)) return;
-		if (target.length > 80) {
-			return this.sendReply("Error: Room rules link is too long (must be under 80 characters). You can use a URL shortener to shorten the link.");
-		}
-
-		room.rulesLink = target.trim();
-		this.sendReply("(The room rules link is now: " + target + ")");
-
-		if (room.chatRoomData) {
-			room.chatRoomData.rulesLink = room.rulesLink;
-			Rooms.global.writeChatRoomData();
-		}
+		if (!this.canBroadcast()) return;
+		this.sendReplyBox(
+			"<center><strong>~SERVER RULES~</strong></center>" +
+			"<ol>" +
+				"<li>No rasicm or religion talk = Ban (1-∞ Days)</li>" +
+				"<li>Be nice to other players = Ban (1-∞ Days)</li>" +
+				"<li>Do not ask for being staff = Mute (1-∞ hours)</li>" +
+				"<li>Do not spam GymLeaders/EliteFour/Champion for a battle = Mute (1-∞ hours)</li>" +
+				"<li>Wait patient when you ask the staff a question = Mute (1-∞ hours)</li>" +
+				"<li>Disrespect over staff = Ban (1-∞ Days)</li>" +
+				"<li>Abusive useage of /cc = Ban + Demotion from \"Donator\" to regular player = Ban (∞ Days)</li>" +
+			"</ol>"
+		);
 	},
 
 	faq: function (target, room, user) {
