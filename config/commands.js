@@ -1238,6 +1238,52 @@ var commands = exports.commands = {
 		};
 	})(),
 
+	gym: 'gymleaders',
+	gymleaders: (function () {
+		const gyms = [
+			{
+				name: "Water",
+				leader: "Bowenn",
+				rules: ["OU BATTLE", "6v6 BATTLE"]
+			},{
+				name: "Phychic",
+				leader: "Mike2936",
+				rules: ["OU BATTLE", "6v6 BATTLE", "No Destiny Bond Wobbuffet"]
+			},{
+				name: "Fire",
+				leader: "DoctorJoey",
+				rules: ["OU BATTLE", "6v6 BATTLE"]
+			}
+		];
+
+		return function (target) {
+			if (!this.canBroadcast()) return;
+
+			var parts = target.split(',').map(function (p) { return p.trim(); });
+			if (!parts[0]) parts = Object.keys(gyms).map(function (p) { return parseInt(p, 10) + 1; });
+
+			var buffer = [];
+			parts.forEach(function (part) {
+				var gym = gyms[part - 1];
+				if (!gym) {
+					buffer.push("<center><strong>" + Tools.escapeHTML(part) + " is not a valid gym number</strong></center>");
+					return;
+				}
+
+
+				buffer.push(
+					"<center><strong>~" + Tools.escapeHTML(gym.name) + " Gym~</strong></center>" +
+					"<strong>~~Leader: " + Tools.escapeHTML(gym.leader) + "~~</strong><br />" +
+					"<strong>~Gym #" + part + " Rules~</strong><br />"+
+					"<ul>" +
+						gym.rules.map(function (rule) { return '<li>' + Tools.escapeHTML(rule) + '</li>'; }).join('') +
+					"</ul>"
+				);
+			});
+			this.sendReplyBox(buffer.join('<br />'));
+		};
+	})(),
+
 	/*********************************************************
 	 * Help commands
 	 *********************************************************/
