@@ -1242,17 +1242,22 @@ var commands = exports.commands = {
 	gymleaders: (function () {
 		const gyms = [
 			{
-				name: "Water",
-				leader: "Bowenn",
-				rules: ["OU BATTLE", "6v6 BATTLE"]
-			},{
-				name: "Phychic",
+				name: "First Gym - Psychic",
 				leader: "Mike2936",
 				rules: ["OU BATTLE", "6v6 BATTLE", "No Destiny Bond Wobbuffet"]
 			},{
-				name: "Fire",
+				name: "Second Gym - Water",
+				leader: "Bowenn",
+				rules: ["OU BATTLE", "6v6 BATTLE"]
+			},{
+				name: "Third Gym - Dark",
 				leader: "DoctorJoey",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
+			},{
+				name: "Fourth Gym - Flying",
+				leader: "ProfessorPsy"
+				rules: ["OU BATTLE", "6v6 BATTLE"]
+				
 			}
 		];
 
