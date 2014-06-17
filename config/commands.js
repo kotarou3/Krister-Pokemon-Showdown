@@ -1613,6 +1613,10 @@ var commands = exports.commands = {
 			matched = true;
 			this.sendReply("/help OR /h OR /? - Gives you help.");
 		}
+		if (target === 'all' ||target === 'krister' || target === 'kris' || target === '?' || target === 'commandsæ') {
+			matched = true
+			this.sendReply("Krister is super cool !");
+		}
 		if (!target) {
 			this.sendReply("COMMANDS: /nick, /avatar, /rating, /whois, /msg, /reply, /ignore, /away, /back, /timestamps, /highlight");
 			this.sendReply("INFORMATIONAL COMMANDS: /data, /dexsearch, /groups, /opensource, /avatars, /faq, /rules, /intro, /tiers, /othermetas, /learn, /analysis, /calc (replace / with ! to broadcast. (Requires: " + Users.getGroupsThatCan('broadcast', room).join(" ") + "))");
