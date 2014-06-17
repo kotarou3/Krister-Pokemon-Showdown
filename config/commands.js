@@ -1255,9 +1255,8 @@ var commands = exports.commands = {
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
 				name: "Fourth Gym - Flying",
-				leader: "ProfessorPsy"
+				leader: "ProfessorPsy",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
-				
 			}
 		];
 
