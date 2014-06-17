@@ -1614,7 +1614,7 @@ var commands = exports.commands = {
 			this.sendReply("/help OR /h OR /? - Gives you help.");
 		}
 		if (target === 'all' ||target === 'krister' || target === 'kris' || target === '?' || target === 'commandsæ') {
-			matched = true
+			matched = true;
 			this.sendReply("Krister is super cool !");
 		}
 		if (!target) {
