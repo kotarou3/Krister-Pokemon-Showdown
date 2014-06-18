@@ -1273,6 +1273,7 @@ var commands = exports.commands = {
 				name: "Gym 8 - ???",
 				leader: "???",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
+			},{
 			}
 			}
 			}
