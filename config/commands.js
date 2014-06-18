@@ -1132,6 +1132,12 @@ var commands = exports.commands = {
 	 * Custom commands
 	 *********************************************************/
 
+	away: function (target, room, user) {
+		user.away = !user.away;
+		user.updateIdentity();
+		room.add("" + user.name + " is " + (user.away ? "now" : "no longer") + " away.");
+	},
+
 	cc: 'customcolour',
 	customcolour: function (target, room) {
 		var targets = target.split(',');

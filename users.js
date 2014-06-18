@@ -384,22 +384,23 @@ var User = (function () {
 	};
 	User.prototype.getIdentity = function (roomid) {
 		if (!roomid) roomid = 'lobby';
+		var name = this.name + (this.away ? " - \u0410\u051d\u0430\u0443" : "");
 		if (this.locked) {
-			return Config.lockedSymbol + this.name;
+			return Config.lockedSymbol + name;
 		}
 		if (this.mutedRooms[roomid]) {
-			return Config.mutedSymbol + this.name;
+			return Config.mutedSymbol + name;
 		}
 		var room = Rooms.rooms[roomid];
 		if (room.auth) {
 			if (room.auth[this.userid]) {
-				return room.auth[this.userid] + this.name;
+				return room.auth[this.userid] + name;
 			}
 			if (room.isPrivate) {
-				return Config.groups.default[room.type + 'Room'] + this.name;
+				return Config.groups.default[room.type + 'Room'] + name;
 			}
 		}
-		return this.group + this.name;
+		return this.group + name;
 	};
 	User.prototype.can = function (permission, target, room) {
 		if (this.hasSysopAccess()) return true;
