@@ -1242,42 +1242,37 @@ var commands = exports.commands = {
 	gymleaders: (function () {
 		const gyms = [
 			{
-				name: "Gym 1 - Psychic",
+				name: "Psychic",
 				leader: "Mike2936",
 				rules: ["OU BATTLE", "6v6 BATTLE", "No Destiny Bond Wobbuffet"]
 			},{
-				name: "Gym 2 - Water",
+				name: "Water",
 				leader: "Bowenn",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 3 - Dark",
+				name: "Dark",
 				leader: "DoctorJoey",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 4 - Flying",
+				name: "Flying",
 				leader: "ProfessorPsy",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 5 - Dragon",
+				name: "Dragon",
 				leader: "Matias",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 6 - Ice",
+				name: "Ice",
 				leader: "XavierFlynt",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 7 - ???",
+				name: "???",
 				leader: "???",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "Gym 8 - ???",
+				name: "???",
 				leader: "???",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
-			},{
-			}
-			}
-			}
-			}
 			}
 		];
 
@@ -1297,9 +1292,9 @@ var commands = exports.commands = {
 
 
 				buffer.push(
-					"<center><strong>~" + Tools.escapeHTML(gym.name) + " Gym~</strong></center>" +
+					"<center><strong>~Gym " + part + " - " + Tools.escapeHTML(gym.name) + " Gym~</strong></center>" +
 					"<strong>~~Leader: " + Tools.escapeHTML(gym.leader) + "~~</strong><br />" +
-					"<strong>~Gym #" + part + " Rules~</strong><br />"+
+					"<strong>~Gym Rules~</strong><br />"+
 					"<ul>" +
 						gym.rules.map(function (rule) { return '<li>' + Tools.escapeHTML(rule) + '</li>'; }).join('') +
 					"</ul>"
@@ -1634,7 +1629,7 @@ var commands = exports.commands = {
 			matched = true;
 			this.sendReply("/help OR /h OR /? - Gives you help.");
 		}
-		if (target === 'all' ||target === 'krister' || target === 'kris' || target === '?' || target === 'commandsæ') {
+		if (target === 'all' || target === 'krister' || target === 'kris') {
 			matched = true;
 			this.sendReply("Krister is super cool !");
 		}
