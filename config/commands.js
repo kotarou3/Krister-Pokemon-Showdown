@@ -1132,6 +1132,7 @@ var commands = exports.commands = {
 	 * Custom commands
 	 *********************************************************/
 
+	afk: 'away',
 	away: function (target, room, user) {
 		user.away = !user.away;
 		user.updateIdentity();
