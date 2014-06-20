@@ -384,7 +384,7 @@ var User = (function () {
 	};
 	User.prototype.getIdentity = function (roomid) {
 		if (!roomid) roomid = 'lobby';
-		var name = this.name + (this.away ? " - \u0410\u051d\u0430\u0443" : "");
+		var name = this.name + (this.away ? " - \u0391\u03dc\u039a" : "");
 		if (this.locked) {
 			return Config.lockedSymbol + name;
 		}
