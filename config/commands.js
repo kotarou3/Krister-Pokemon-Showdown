@@ -1273,12 +1273,12 @@ var commands = exports.commands = {
 				leader: "XavierFlynt",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "???",
-				leader: "???",
+				name: "Fire",
+				leader: "Olearne",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			},{
-				name: "???",
-				leader: "???",
+				name: "NeedWeed",
+				leader: "Ground",
 				rules: ["OU BATTLE", "6v6 BATTLE"]
 			}
 		];
