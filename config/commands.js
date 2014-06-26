@@ -1311,6 +1311,22 @@ var commands = exports.commands = {
 		};
 	})(),
 
+	donate: function () {
+		if (!this.canBroadcast()) return;
+		this.sendReplyBox(
+			"<center><strong>~Donator Shop~</strong></center>" +
+			"Donator rank = $3" +
+			"<ul>" +
+			"<li>Access to !cc</li>" +
+			"<li>Donator rank symbol</li>" +
+			"<li>Custom Avatar</li>" +
+			"<li>Access to Donator Lounge</li>" +
+			"<li>Access to new vip features</li>" +
+			"</ul>" +
+			"CONTACT (Krister or MarcusPareli) TO DONATE"
+		);
+	},
+
 	/*********************************************************
 	 * Help commands
 	 *********************************************************/
