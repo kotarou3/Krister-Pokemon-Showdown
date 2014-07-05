@@ -29,7 +29,7 @@ const THROTTLE_MULTILINE_WARN = 4;
 
 var fs = require('fs');
 
-var users = {};
+var users = Object.create(null);
 var prevUsers = {};
 var numUsers = 0;
 
@@ -771,6 +771,7 @@ var User = (function () {
 					if (Object.isEmpty(Object.select(this.ips, user.ips))) {
 						user.mutedRooms = Object.merge(user.mutedRooms, this.mutedRooms);
 						user.muteDuration = Object.merge(user.muteDuration, this.muteDuration);
+						if (this.locked) user.locked = true;
 						this.mutedRooms = {};
 						this.muteDuration = {};
 						this.locked = false;
