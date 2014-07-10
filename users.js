@@ -392,7 +392,7 @@ var User = (function () {
 			return Config.mutedSymbol + name;
 		}
 		var room = Rooms.rooms[roomid];
-		if (room.auth) {
+		if (room && room.auth) {
 			if (room.auth[this.userid]) {
 				return room.auth[this.userid] + name;
 			}
