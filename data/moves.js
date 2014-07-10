@@ -15283,5 +15283,26 @@ exports.BattleMovedex = {
 		},
 		target: "normal",
 		type: "Water"
+	},
+	/*************************************************/
+	"krister": {
+		accuracy: true,
+		basePower: 150,
+		category: "Physical",
+		desc: "Hits all adjacent foes and sends them to sleep",
+		shortDesc: "Hits all adjacent foes and sends them to sleep",
+		id: "krister",
+		isNonstandard: true,
+		isViable: true,
+		name: "Krister",
+		pp: 10,
+		priority: 0,
+		isContact: true,
+		secondary: {
+			chance: 100,
+			volatileStatus: 'slp'
+		},
+		target: "allAdjacentFoes",
+		type: "Normal"
 	}
 };
