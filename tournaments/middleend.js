@@ -482,7 +482,7 @@ var Tournament = (function () {
 			output.sendReply('|tournament|error|NotStarted');
 			return false;
 		}
-		if (!(timeout > 0)) {
+		if (!(timeout > 0) || timeout < AUTO_DISQUALIFY_WARNING_TIMEOUT) {
 			output.sendReply('|tournament|error|InvalidAutoDisqualifyTimeout');
 			return false;
 		}
@@ -497,7 +497,11 @@ var Tournament = (function () {
 		this.runAutoDisqualify();
 		return true;
 	};
-	Tournament.prototype.runAutoDisqualify = function () {
+	Tournament.prototype.runAutoDisqualify = function (output) {
+		if (!this.isTournamentStarted) {
+			output.sendReply('|tournament|error|NotStarted');
+			return false;
+		}
 		this.lastActionTimes.forEach(function (time, user) {
 			var availableMatches = 0;
 			this.availableMatches.get(user).forEach(function (isAvailable) {
@@ -508,11 +512,17 @@ var Tournament = (function () {
 			if (availableMatches === 0 && !pendingChallenge) return;
 			if (pendingChallenge && pendingChallenge.to) return;
 
-			if (Date.now() > time + this.autoDisqualifyTimeout) {
+			if (Date.now() > time + this.autoDisqualifyTimeout && this.isAutoDisqualifyWarned.get(user)) {
 				this.disqualifyUser(user);
 			} else if (Date.now() > time + this.autoDisqualifyTimeout - AUTO_DISQUALIFY_WARNING_TIMEOUT && !this.isAutoDisqualifyWarned.get(user)) {
+				var remainingTime = this.autoDisqualifyTimeout - Date.now() + time;
+				if (remainingTime <= 0) {
+					remainingTime = AUTO_DISQUALIFY_WARNING_TIMEOUT;
+					this.lastActionTimes.set(user, Date.now() - this.autoDisqualifyTimeout + AUTO_DISQUALIFY_WARNING_TIMEOUT);
+				}
+
 				this.isAutoDisqualifyWarned.set(user, true);
-				user.sendTo(this.room, '|tournament|autodq|target|' + (this.autoDisqualifyTimeout - Date.now() + time));
+				user.sendTo(this.room, '|tournament|autodq|target|' + remainingTime);
 			} else {
 				this.isAutoDisqualifyWarned.set(user, false);
 			}
@@ -764,7 +774,7 @@ var commands = {
 			}
 		},
 		runautodq: function (tournament) {
-			tournament.runAutoDisqualify();
+			tournament.runAutoDisqualify(this);
 		},
 		end: 'delete',
 		stop: 'delete',
