@@ -371,9 +371,16 @@ exports.Formats = [
 		}
 	},
 	{
-		name: "CAP",
+		name: "Metronome Tier",
 		section: "Other Metagames",
 		column: 2,
+
+		team: 'randomMetronome',
+		ruleset: ['Pokemon', 'HP Percentage Mod']
+	},
+	{
+		name: "CAP",
+		section: "Other Metagames",
 
 		ruleset: ['CAP Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
 		banlist: ['Uber', 'Soul Dew', 'Gengarite', 'Kangaskhanite', 'Lucarionite']

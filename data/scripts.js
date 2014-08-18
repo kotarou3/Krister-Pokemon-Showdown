@@ -599,6 +599,17 @@ exports.BattleScripts = {
 			return this.randomTeam(side);
 		}
 	},
+	randomMetronomeTeam: function (side) {
+		var team = this.randomCCTeam(side);
+		for (var t = 0; t < team.length; ++t) {
+			team[t].name = "Mew";
+			team[t].moves = ["Metronome"];
+			team[t].ability = "Synchronize";
+			team[t].item = "Leppa Berry";
+			team[t].level = 100;
+		}
+		return team;
+	},
 	randomCCTeam: function (side) {
 		var teamdexno = [];
 		var team = [];
