@@ -189,6 +189,12 @@ var commands = exports.commands = {
 		}
 	},
 
+	staffbattleroom: function (target, room, user) {
+		if (!this.can('staffbattleroom') || room.type !== 'battle') return;
+		room.staffRoom = target !== 'off';
+		this.addModCommand("" + user.name + " made this room " + (target !== 'off' ? "only available to staff" : "available to everyone") + " to join.");
+	},
+
 	modjoin: function (target, room, user) {
 		if (!this.can('privateroom', room)) return;
 		if (target === 'off') {
@@ -487,8 +493,21 @@ var commands = exports.commands = {
 	 * Moderating: Punishments
 	 *********************************************************/
 
-	kick: 'warn',
-	k: 'warn',
+	k: 'kick',
+	kick: function (target, room, user){
+		if (!target) return;
+		target = this.splitTarget(target);
+		var targetUser = this.targetUser;
+		if (!targetUser || !targetUser.connected) {
+			return this.sendReply("User " + this.targetUsername + " not found.");
+		}
+		if (!this.can('kick', targetUser)) return false;
+		var msg = "kicked by " + user.name + (target ? " (" + target + ")" : "") + ".";
+		this.addModCommand("" + targetUser.name + " was " + msg);
+		targetUser.popup("You have been " + msg);
+		targetUser.leaveRoom(room);
+	},
+
 	warn: function (target, room, user) {
 		if (!target) return this.parse('/help warn');
 		if (user.locked || user.mutedRooms[room.id]) return this.sendReply("You cannot do this while unable to talk.");
