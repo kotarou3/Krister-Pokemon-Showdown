@@ -1433,11 +1433,10 @@ var commands = exports.commands = {
 					return;
 				}
 
-
 				buffer.push(
 					"<center><strong>~" + Tools.escapeHTML(gym.name) + " Gym~</strong></center>" +
 					"<strong>~~Leader: " + Tools.escapeHTML(gym.leader) + "~~</strong><br />" +
-					"<strong>~Gym #" + part + " Rules~</strong><br />"+
+					"<strong>~Gym #" + part + " Rules~</strong><br />" +
 					"<ul>" +
 						gym.rules.map(function (rule) { return '<li>' + Tools.escapeHTML(rule) + '</li>'; }).join('') +
 					"</ul>"
