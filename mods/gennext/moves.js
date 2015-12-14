@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleMovedex = {
 	/******************************************************************
 	Perfect accuracy moves:
@@ -189,10 +191,6 @@ exports.BattleMovedex = {
 			onTryHitPriority: 3,
 			onTryHit: function (target, source, move) {
 				if (target.volatiles.substitute || !move.flags['protect']) return;
-				if (move.breaksProtect) {
-					target.removeVolatile('Protect');
-					return;
-				}
 				this.add('-activate', target, 'Protect');
 				var lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
@@ -215,10 +213,6 @@ exports.BattleMovedex = {
 			onTryHitPriority: 3,
 			onTryHit: function (target, source, move) {
 				if (target.volatiles.substitute || !move.flags['protect'] || move.category === 'Status') return;
-				if (move.breaksProtect) {
-					target.removeVolatile('kingsshield');
-					return;
-				}
 				this.add('-activate', target, 'Protect');
 				var lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
@@ -243,11 +237,7 @@ exports.BattleMovedex = {
 			},
 			onTryHitPriority: 3,
 			onTryHit: function (target, source, move) {
-				if (target.volatiles.substitute) return;
-				if (move.breaksProtect) {
-					target.removeVolatile('spikyshield');
-					return;
-				}
+				if (target.volatiles.substitute || !move.flags['protect']) return;
 				if (move && (move.target === 'self' || move.id === 'suckerpunch')) return;
 				this.add('-activate', target, 'move: Protect');
 				if (move.flags['contact']) {
@@ -306,6 +296,7 @@ exports.BattleMovedex = {
 				this.heal(pokemon.maxhp / 2);
 			}
 		},
+		flags: {charge: 1, mirror: 1},
 		breaksProtect: true
 	},
 	razorwind: {
@@ -321,6 +312,7 @@ exports.BattleMovedex = {
 			chance: 100,
 			volatileStatus: 'confusion'
 		},
+		flags: {charge: 1, mirror: 1},
 		breaksProtect: true
 	},
 	skullbash: {
@@ -346,6 +338,7 @@ exports.BattleMovedex = {
 			attacker.addVolatile('twoturnmove', defender);
 			return null;
 		},
+		flags: {contact: 1, charge: 1, mirror: 1},
 		breaksProtect: true
 	},
 	skyattack: {
@@ -363,6 +356,7 @@ exports.BattleMovedex = {
 				def: -1
 			}
 		},
+		flags: {charge: 1, mirror: 1, distance: 1},
 		breaksProtect: true
 	},
 	freezeshock: {
@@ -378,6 +372,7 @@ exports.BattleMovedex = {
 			chance: 100,
 			status: 'par'
 		},
+		flags: {charge: 1, mirror: 1},
 		breaksProtect: true
 	},
 	iceburn: {
@@ -393,6 +388,7 @@ exports.BattleMovedex = {
 			chance: 100,
 			status: 'brn'
 		},
+		flags: {charge: 1, mirror: 1},
 		breaksProtect: true
 	},
 	bounce: {
@@ -408,6 +404,7 @@ exports.BattleMovedex = {
 			chance: 30,
 			status: 'par'
 		},
+		flags: {contact: 1, charge: 1, mirror: 1, gravity: 1, distance: 1},
 		breaksProtect: true
 	},
 	fly: {
@@ -425,6 +422,7 @@ exports.BattleMovedex = {
 				def: -1
 			}
 		},
+		flags: {contact: 1, charge: 1, mirror: 1, gravity: 1, distance: 1},
 		breaksProtect: true
 	},
 	dig: {
@@ -442,6 +440,7 @@ exports.BattleMovedex = {
 				def: -1
 			}
 		},
+		flags: {contact: 1, charge: 1, mirror: 1, nonsky: 1},
 		breaksProtect: true
 	},
 	dive: {
@@ -459,6 +458,7 @@ exports.BattleMovedex = {
 				def: -1
 			}
 		},
+		flags: {contact: 1, charge: 1, mirror: 1, nonsky: 1},
 		breaksProtect: true
 	},
 	phantomforce: {
@@ -504,6 +504,7 @@ exports.BattleMovedex = {
 				def: -1
 			}
 		},
+		flags: {contact: 1, charge: 1, mirror: 1, gravity: 1, distance: 1},
 		breaksProtect: true
 	},
 	hyperbeam: {
@@ -723,24 +724,26 @@ exports.BattleMovedex = {
 				'Timid': 'Jolly',
 				'Jolly': 'Timid'
 			};
+			var tmpAtkEVs;
+			var Atk2SpA;
 			if (pokemon.template.speciesid === 'meloettapirouette' && pokemon.formeChange('Meloetta')) {
 				this.add('-formechange', pokemon, 'Meloetta');
-				var tmpAtkEVs = pokemon.set.evs.atk;
+				tmpAtkEVs = pokemon.set.evs.atk;
 				pokemon.set.evs.atk = pokemon.set.evs.spa;
 				pokemon.set.evs.spa = tmpAtkEVs;
 				if (natureChange[pokemon.set.nature]) pokemon.set.nature = natureChange[pokemon.set.nature];
-				var Atk2SpA = (pokemon.boosts.spa || 0) - (pokemon.boosts.atk || 0);
+				Atk2SpA = (pokemon.boosts.spa || 0) - (pokemon.boosts.atk || 0);
 				this.boost({
 					atk: Atk2SpA,
 					spa: -Atk2SpA
 				}, pokemon);
 			} else if (pokemon.formeChange('Meloetta-Pirouette')) {
 				this.add('-formechange', pokemon, 'Meloetta-Pirouette');
-				var tmpAtkEVs = pokemon.set.evs.atk;
+				tmpAtkEVs = pokemon.set.evs.atk;
 				pokemon.set.evs.atk = pokemon.set.evs.spa;
 				pokemon.set.evs.spa = tmpAtkEVs;
 				if (natureChange[pokemon.set.nature]) pokemon.set.nature = natureChange[pokemon.set.nature];
-				var Atk2SpA = (pokemon.boosts.spa || 0) - (pokemon.boosts.atk || 0);
+				Atk2SpA = (pokemon.boosts.spa || 0) - (pokemon.boosts.atk || 0);
 				this.boost({
 					atk: Atk2SpA,
 					spa: -Atk2SpA
@@ -777,7 +780,7 @@ exports.BattleMovedex = {
 			onSwitchIn: function (pokemon) {
 				var factor = 2;
 				if (pokemon.hasType('Flying')) factor = 4;
-				var damage = this.damage(pokemon.maxhp * factor / 16);
+				this.damage(pokemon.maxhp * factor / 16);
 			}
 		}
 	},
@@ -810,15 +813,15 @@ exports.BattleMovedex = {
 			self: {
 				onHit: function (target, source) {
 					var stats = [];
-					for (var i in target.boosts) {
-						if (i !== 'accuracy' && i !== 'evasion' && i !== 'atk' && target.boosts[i] < 6) {
-							stats.push(i);
+					for (var stat in target.boosts) {
+						if (stat !== 'accuracy' && stat !== 'evasion' && stat !== 'atk' && target.boosts[stat] < 6) {
+							stats.push(stat);
 						}
 					}
 					if (stats.length) {
-						var i = stats[this.random(stats.length)];
+						var randomStat = stats[this.random(stats.length)];
 						var boost = {};
-						boost[i] = 1;
+						boost[randomStat] = 1;
 						this.boost(boost);
 					} else {
 						return false;
@@ -840,15 +843,15 @@ exports.BattleMovedex = {
 			self: {
 				onHit: function (target, source) {
 					var stats = [];
-					for (var i in target.boosts) {
-						if (i !== 'accuracy' && i !== 'evasion' && i !== 'atk' && target.boosts[i] < 6) {
-							stats.push(i);
+					for (var stat in target.boosts) {
+						if (stat !== 'accuracy' && stat !== 'evasion' && stat !== 'atk' && target.boosts[stat] < 6) {
+							stats.push(stat);
 						}
 					}
 					if (stats.length) {
-						var i = stats[this.random(stats.length)];
+						var randomStat = stats[this.random(stats.length)];
 						var boost = {};
-						boost[i] = 1;
+						boost[randomStat] = 1;
 						this.boost(boost);
 					} else {
 						return false;
@@ -864,15 +867,15 @@ exports.BattleMovedex = {
 			self: {
 				onHit: function (target, source) {
 					var stats = [];
-					for (var i in target.boosts) {
-						if (i !== 'accuracy' && i !== 'evasion' && i !== 'atk' && target.boosts[i] < 6) {
-							stats.push(i);
+					for (var stat in target.boosts) {
+						if (stat !== 'accuracy' && stat !== 'evasion' && stat !== 'atk' && target.boosts[stat] < 6) {
+							stats.push(stat);
 						}
 					}
 					if (stats.length) {
-						var i = stats[this.random(stats.length)];
+						var randomStat = stats[this.random(stats.length)];
 						var boost = {};
-						boost[i] = 1;
+						boost[randomStat] = 1;
 						this.boost(boost);
 					} else {
 						return false;
@@ -1191,6 +1194,7 @@ exports.BattleMovedex = {
 				targetPosition: target.position,
 				source: source,
 				moveData: {
+					name: "Future Sight",
 					basePower: 80,
 					category: "Special",
 					flags: {},
@@ -1852,7 +1856,8 @@ exports.BattleMovedex = {
 				var illusionMoves = user.illusion.moves.filter(function (move) {
 					return this.getMove(move).category !== 'Status';
 				}, this);
-				if (illusionMoves.length) move.name = this.getMove(illusionMoves.sample()).name;
+				if (!illusionMoves.length) return;
+				move.name = this.getMove(illusionMoves[this.random(illusionMoves.length)]).name;
 			}
 		}
 	},

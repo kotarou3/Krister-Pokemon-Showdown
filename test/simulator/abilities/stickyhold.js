@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Sticky Hold', function () {
 	afterEach(function () {
@@ -30,7 +32,7 @@ describe('Sticky Hold', function () {
 		assert.strictEqual(battle.p1.active[0].item, 'razzberry');
 	});
 
-	it('should be bypassed by Mold Breaker', function () {
+	it('should be suppressed by Mold Breaker', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: 'Pangoro', ability: 'moldbreaker', moves: ['knockoff']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Shuckle', ability: 'stickyhold', item: 'ironball', moves: ['rest']}]);

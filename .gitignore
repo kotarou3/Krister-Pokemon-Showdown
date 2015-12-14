@@ -2,7 +2,8 @@
 /logs/*
 /repl/*
 /node_modules
-/gulp-cache
+/eslint-cache
+/chat-plugins/private.js
 npm-debug.log
 
 # boilerplate #

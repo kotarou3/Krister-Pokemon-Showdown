@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Wonder Guard', function () {
 	afterEach(function () {
@@ -10,7 +12,7 @@ describe('Wonder Guard', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: "Aerodactyl", ability: 'wonderguard', moves: ['sleeptalk']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Smeargle", ability: 'owntempo', moves: ['knockoff', 'flamethrower', 'thousandarrows', 'moonblast']}]);
-		for (var i = 1; i <= 4; i++) {
+		for (let i = 1; i <= 4; i++) {
 			battle.choose('p2', 'move ' + i);
 			battle.commitDecisions();
 			assert.strictEqual(battle.p1.active[0].hp, battle.p1.active[0].maxhp);
@@ -35,7 +37,7 @@ describe('Wonder Guard', function () {
 		assert.ok(!battle.p1.active[0].hasAbility('wonderguard'));
 	});
 
-	it('should be bypassed by Mold Breaker', function () {
+	it('should be suppressed by Mold Breaker', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: "Zekrom", ability: 'wonderguard', moves: ['sleeptalk']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Reshiram", ability: 'turboblaze', moves: ['fusionflare']}]);

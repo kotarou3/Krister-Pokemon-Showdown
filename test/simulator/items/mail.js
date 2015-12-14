@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Mail', function () {
 	afterEach(function () {
@@ -11,7 +13,7 @@ describe('Mail', function () {
 		battle.join('p1', 'Guest 1', 1, [{species: 'Blissey', ability: 'naturalcure', item: 'mail', moves: ['softboiled']}]);
 		battle.join('p2', 'Guest 2', 1, [
 			{species: 'Fennekin', ability: 'magician', moves: ['grassknot']},
-			{species: 'Abra', ability: 'synchronize', moves: ['thief']},
+			{species: 'Abra', ability: 'synchronize', moves: ['trick']},
 			{species: 'Lopunny', ability: 'klutz', moves: ['switcheroo']}
 		]);
 		battle.commitDecisions();
@@ -38,6 +40,14 @@ describe('Mail', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: 'Pangoro', ability: 'ironfist', item: 'mail', moves: ['swordsdance']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Abra', ability: 'synchronize', moves: ['knockoff']}]);
+		battle.commitDecisions();
+		assert.notStrictEqual(battle.p1.active[0].item, 'mail');
+	});
+
+	it('should be stolen by Thief', function () {
+		battle = BattleEngine.Battle.construct();
+		battle.join('p1', 'Guest 1', 1, [{species: 'Pangoro', ability: 'ironfist', item: 'mail', moves: ['swordsdance']}]);
+		battle.join('p2', 'Guest 2', 1, [{species: 'Abra', ability: 'synchronize', moves: ['thief']}]);
 		battle.commitDecisions();
 		assert.notStrictEqual(battle.p1.active[0].item, 'mail');
 	});

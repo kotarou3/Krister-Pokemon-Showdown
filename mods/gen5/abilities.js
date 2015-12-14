@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleAbilities = {
 	"frisk": {
 		inherit: true,
@@ -21,7 +23,7 @@ exports.BattleAbilities = {
 		onUpdate: function (pokemon) {
 			if (pokemon.volatiles['attract']) {
 				pokemon.removeVolatile('attract');
-				this.add('-end', pokemon, 'move: Attract');
+				this.add('-end', pokemon, 'move: Attract', '[from] ability: Oblivious');
 			}
 		},
 		onTryHit: function (pokemon, target, move) {
@@ -39,5 +41,16 @@ exports.BattleAbilities = {
 		inherit: true,
 		desc: "This Pokemon is immune to Grass moves. If hit by a Grass move, its Attack is increased by one stage (once for each hit of Bullet Seed). Does not affect Aromatherapy.",
 		onAllyTryHitSide: function () {}
+	},
+	"serenegrace": {
+		inherit: true,
+		onModifyMove: function (move) {
+			if (move.secondaries && move.id !== 'secretpower') {
+				this.debug('doubling secondary chance');
+				for (var i = 0; i < move.secondaries.length; i++) {
+					move.secondaries[i].chance *= 2;
+				}
+			}
+		}
 	}
 };

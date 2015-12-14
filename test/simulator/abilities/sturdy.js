@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Sturdy', function () {
 	afterEach(function () {
@@ -8,7 +10,7 @@ describe('Sturdy', function () {
 
 	it('should give the user an immunity to OHKO moves', function () {
 		battle = BattleEngine.Battle.construct();
-		battle.join('p1', 'Guest 1', 1, [{species: 'Aron', level: 1, ability: 'sturdy',  moves: ['sleeptalk']}]);
+		battle.join('p1', 'Guest 1', 1, [{species: 'Aron', level: 1, ability: 'sturdy', moves: ['sleeptalk']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Kyogre', ability: 'noguard', moves: ['sheercold']}]);
 		battle.commitDecisions();
 		assert.strictEqual(battle.p1.active[0].hp, battle.p1.active[0].maxhp);
@@ -26,7 +28,6 @@ describe('Sturdy', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: 'Shedinja', ability: 'sturdy', moves: ['absorb']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Klefki', ability: 'prankster', moves: ['confuseray']}]);
-		battle.seed = [1, 2, 3, 4];
 		battle.commitDecisions();
 		assert.strictEqual(battle.p1.active[0].hp, 1);
 	});
@@ -47,7 +48,7 @@ describe('Sturdy', function () {
 		assert.strictEqual(battle.p1.active[0].hp, 0);
 	});
 
-	it('should be bypassed by Mold Breaker', function () {
+	it('should be suppressed by Mold Breaker', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: 'Paras', ability: 'sturdy', moves: ['sleeptalk']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Reshiram', ability: 'turboblaze', moves: ['fusionflare']}]);

@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Thousand Arrows', function () {
 	afterEach(function () {
@@ -43,7 +45,7 @@ describe('Thousand Arrows', function () {
 		battle.join('p2', 'Guest 2', 1, [{species: "Ho-Oh", ability: 'shellarmor', item: 'ironball', moves: ['recover', 'trick']}]);
 		battle.commitDecisions();
 		assert.ok(!battle.log[battle.lastMoveLine + 1].startsWith('|-supereffective|'));
-		var hp = battle.p2.active[0].hp;
+		let hp = battle.p2.active[0].hp;
 		assert.notStrictEqual(hp, battle.p2.active[0].maxhp);
 		battle.choose('p1', 'move 2');
 		battle.choose('p2', 'move 2');
@@ -82,7 +84,6 @@ describe('Thousand Arrows', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: "Zygarde", ability: 'aurabreak', moves: ['thousandarrows', 'earthquake']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Eelektross", ability: 'levitate', item: 'weaknesspolicy', moves: ['thunderwave']}]);
-		battle.seed = [0, 0, 0, 0];
 		battle.commitDecisions();
 		assert.strictEqual(battle.p2.active[0].boosts.atk, 2);
 		assert.strictEqual(battle.p2.active[0].boosts.spa, 2);

@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Klutz', function () {
 	afterEach(function () {
@@ -29,6 +31,14 @@ describe('Klutz', function () {
 		battle.join('p2', 'Guest 2', 1, [{species: "Deoxys", ability: 'noguard', moves: ['psychic']}]);
 		battle.commitDecisions();
 		assert.strictEqual(battle.p1.active[0].lastMove, 'protect');
+	});
+
+	it('should not ignore item effects that prevent item removal', function () {
+		battle = BattleEngine.Battle.construct();
+		battle.join('p1', 'Guest 1', 1, [{species: "Genesect", ability: 'klutz', item: 'dousedrive', moves: ['calmmind']}]);
+		battle.join('p2', 'Guest 2', 1, [{species: "Deoxys", ability: 'noguard', moves: ['trick']}]);
+		battle.commitDecisions();
+		assert.strictEqual(battle.p1.active[0].item, 'dousedrive');
 	});
 
 	it('should cause Fling to fail', function () {

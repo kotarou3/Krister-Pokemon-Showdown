@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleMovedex = {
 	acupressure: {
 		inherit: true,
@@ -8,15 +10,15 @@ exports.BattleMovedex = {
 				return false;
 			}
 			var stats = [];
-			for (var i in target.boosts) {
-				if (target.boosts[i] < 6) {
-					stats.push(i);
+			for (var stat in target.boosts) {
+				if (target.boosts[stat] < 6) {
+					stats.push(stat);
 				}
 			}
 			if (stats.length) {
-				var i = stats[this.random(stats.length)];
+				var randomStat = stats[this.random(stats.length)];
 				var boost = {};
-				boost[i] = 2;
+				boost[randomStat] = 2;
 				this.boost(boost);
 			} else {
 				return false;
@@ -41,12 +43,12 @@ exports.BattleMovedex = {
 					}
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) {
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) {
 				return false;
 			}
-			this.useMove(move, target);
+			this.useMove(randomMove, target);
 		}
 	},
 	aquaring: {
@@ -223,10 +225,6 @@ exports.BattleMovedex = {
 			onTryHitPriority: 3,
 			onTryHit: function (target, source, move) {
 				if (!move.flags['protect']) return;
-				if (move.breaksProtect) {
-					target.removeVolatile('Protect');
-					return;
-				}
 				this.add('-activate', target, 'Protect');
 				var lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
@@ -294,7 +292,38 @@ exports.BattleMovedex = {
 	doomdesire: {
 		inherit: true,
 		accuracy: 85,
-		basePower: 120
+		basePower: 120,
+		onTry: function (source, target) {
+			target.side.addSideCondition('futuremove');
+			if (target.side.sideConditions['futuremove'].positions[target.position]) {
+				return false;
+			}
+			var damage = this.getDamage(source, target, {
+				name: "Doom Desire",
+				basePower: 120,
+				category: "Special",
+				flags: {},
+				willCrit: false,
+				type: '???'
+			}, true);
+			target.side.sideConditions['futuremove'].positions[target.position] = {
+				duration: 3,
+				move: 'doomdesire',
+				source: source,
+				moveData: {
+					id: 'doomdesire',
+					name: "Doom Desire",
+					accuracy: 85,
+					basePower: 0,
+					damage: damage,
+					category: "Special",
+					flags: {},
+					type: '???'
+				}
+			};
+			this.add('-start', source, 'Doom Desire');
+			return null;
+		}
 	},
 	drainpunch: {
 		inherit: true,
@@ -375,7 +404,6 @@ exports.BattleMovedex = {
 			if (target.hp > pokemon.hp) {
 				return target.hp - pokemon.hp;
 			}
-			this.add('-fail', pokemon);
 			return false;
 		}
 	},
@@ -396,9 +424,10 @@ exports.BattleMovedex = {
 	feint: {
 		inherit: true,
 		basePower: 50,
-		onTryHit: function (target) {
+		onTry: function (source, target) {
 			if (!target.volatiles['protect']) {
-				return false;
+				this.add('-fail', source);
+				return null;
 			}
 		}
 	},
@@ -455,7 +484,38 @@ exports.BattleMovedex = {
 		inherit: true,
 		accuracy: 90,
 		basePower: 80,
-		pp: 15
+		pp: 15,
+		onTry: function (source, target) {
+			target.side.addSideCondition('futuremove');
+			if (target.side.sideConditions['futuremove'].positions[target.position]) {
+				return false;
+			}
+			var damage = this.getDamage(source, target, {
+				name: "Future Sight",
+				basePower: 80,
+				category: "Special",
+				flags: {},
+				willCrit: false,
+				type: '???'
+			}, true);
+			target.side.sideConditions['futuremove'].positions[target.position] = {
+				duration: 3,
+				move: 'futuresight',
+				source: source,
+				moveData: {
+					id: 'futuresight',
+					name: "Future Sight",
+					accuracy: 90,
+					basePower: 0,
+					damage: damage,
+					category: "Special",
+					flags: {},
+					type: '???'
+				}
+			};
+			this.add('-start', source, 'Future Sight');
+			return null;
+		}
 	},
 	gigadrain: {
 		inherit: true,
@@ -533,8 +593,7 @@ exports.BattleMovedex = {
 					return;
 				}
 				if (target.hp > 0) {
-					var source = this.effectData.source;
-					var damage = target.heal(target.maxhp);
+					target.heal(target.maxhp);
 					target.setStatus('');
 					this.add('-heal', target, target.getHealth, '[from] move: Healing Wish');
 					target.side.removeSideCondition('healingwish');
@@ -684,8 +743,7 @@ exports.BattleMovedex = {
 					return;
 				}
 				if (target.hp > 0) {
-					var source = this.effectData.source;
-					var damage = target.heal(target.maxhp);
+					target.heal(target.maxhp);
 					target.setStatus('');
 					for (var m in target.moveset) {
 						target.moveset[m].pp = target.moveset[m].maxpp;
@@ -754,10 +812,10 @@ exports.BattleMovedex = {
 					moves.push(move.id);
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) return false;
-			this.useMove(move, target);
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) return false;
+			this.useMove(randomMove, target);
 		}
 	},
 	mimic: {
@@ -774,7 +832,8 @@ exports.BattleMovedex = {
 				pp: 5,
 				maxpp: move.pp * 8 / 5,
 				disabled: false,
-				used: false
+				used: false,
+				virtual: true
 			};
 			source.moves[moveslot] = toId(move.name);
 			this.add('-activate', source, 'move: Mimic', move.name);
@@ -872,10 +931,6 @@ exports.BattleMovedex = {
 			onTryHitPriority: 3,
 			onTryHit: function (target, source, move) {
 				if (!move.flags['protect']) return;
-				if (move.breaksProtect) {
-					target.removeVolatile('Protect');
-					return;
-				}
 				this.add('-activate', target, 'Protect');
 				var lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
@@ -1064,7 +1119,34 @@ exports.BattleMovedex = {
 	},
 	taunt: {
 		inherit: true,
-		flags: {protect: 1, mirror: 1, authentic: 1}
+		flags: {protect: 1, mirror: 1, authentic: 1},
+		effect: {
+			durationCallback: function () {
+				return this.random(3, 6);
+			},
+			onStart: function (target) {
+				this.add('-start', target, 'move: Taunt');
+			},
+			onResidualOrder: 12,
+			onEnd: function (target) {
+				this.add('-end', target, 'move: Taunt');
+			},
+			onDisableMove: function (pokemon) {
+				var moves = pokemon.moveset;
+				for (var i = 0; i < moves.length; i++) {
+					if (this.getMove(moves[i].move).category === 'Status') {
+						pokemon.disableMove(moves[i].id);
+					}
+				}
+			},
+			onBeforeMovePriority: 5,
+			onBeforeMove: function (attacker, defender, move) {
+				if (move.category === 'Status') {
+					this.add('cant', attacker, 'move: Taunt', move);
+					return false;
+				}
+			}
+		}
 	},
 	thrash: {
 		inherit: true,

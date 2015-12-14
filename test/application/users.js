@@ -1,24 +1,10 @@
-var assert = require('assert');
-function createConnection (ip, workerid, socketid) {
-	if (!workerid || !socketid) {
-		workerid = Object.keys(Sockets.workers)[0];
-		socketid = 1;
-		while (Users.connections[workerid + '-' + socketid]) {
-			socketid++;
-		}
-	}
-	var connectionid = workerid + '-' + socketid;
-	var connection = Users.connections[connectionid] = new Users.Connection(connectionid, Sockets.workers[workerid], socketid, null, ip || '127.0.0.1');
-	return connection;
-}
+'use strict';
 
-function createUser (connection) {
-	if (!connection) connection = createConnection();
-	var user = new Users.User(connection);
-	connection.user = user;
-	user.joinRoom('global', connection);
-	return user;
-}
+const assert = require('assert');
+
+let userUtils = require('./../../dev-tools/users-utils.js');
+let Connection = userUtils.Connection;
+let User = userUtils.User;
 
 describe('Users features', function () {
 	describe('Users', function () {
@@ -32,21 +18,17 @@ describe('Users features', function () {
 			});
 		});
 		describe('users', function () {
-			it('should have null prototype', function () {
-				assert.strictEqual(Object.getPrototypeOf(Users.users), null);
-			});
-
-			it('should not have a native `constructor`', function () {
-				assert.ok(Users.users.constructor === undefined || Users.users.constructor instanceof Users.User);
+			it('should be a Map', function () {
+				assert.ok(Users.users instanceof Map);
 			});
 		});
 		describe('User', function () {
 			describe('#disconnectAll', function () {
 				[1, 2].forEach(function (totalConnections) {
 					it('should drop all ' + totalConnections + ' connection(s) and mark as inactive', function () {
-						var user = createUser();
-						var iterations = totalConnections;
-						while (--iterations) user.merge(createConnection());
+						let user = new User();
+						let iterations = totalConnections;
+						while (--iterations) user.mergeConnection(new Connection());
 
 						user.disconnectAll();
 						assert.strictEqual(user.connections.length, 0);
@@ -54,26 +36,26 @@ describe('Users features', function () {
 					});
 
 					it('should unref all ' + totalConnections + ' connection(s)', function () {
-						var user = createUser();
-						var iterations = totalConnections;
-						while (--iterations) user.merge(createConnection());
+						let user = new User();
+						let iterations = totalConnections;
+						while (--iterations) user.mergeConnection(new Connection());
 
-						var connections = user.connections.slice();
+						let connections = user.connections.slice();
 
 						user.disconnectAll();
-						for (var i = 0; i < totalConnections; i++) {
-							assert.strictEqual(Users.connections[connections[i].id], undefined);
+						for (let i = 0; i < totalConnections; i++) {
+							assert.ok(!Users.connections.has(connections[i].id));
 						}
 					});
 
 					it('should clear `user` property for all ' + totalConnections + ' connection(s)', function () {
-						var user = createUser();
-						var iterations = totalConnections;
-						while (--iterations) user.merge(createConnection());
-						var connections = user.connections.slice();
+						let user = new User();
+						let iterations = totalConnections;
+						while (--iterations) user.mergeConnection(new Connection());
+						let connections = user.connections.slice();
 
 						user.disconnectAll();
-						for (var i = 0; i < totalConnections; i++) {
+						for (let i = 0; i < totalConnections; i++) {
 							assert.strictEqual(connections[i].user, null);
 						}
 					});
@@ -81,28 +63,28 @@ describe('Users features', function () {
 			});
 			describe('#ban', function () {
 				afterEach(function () {
-					for (var ip in Users.bannedIps) {
+					for (let ip in Users.bannedIps) {
 						delete Users.bannedIps[ip];
 					}
 				});
 
 				it('should disconnect every user at that IP', function () {
-					var users = ['127.0.0.1', '127.0.0.1'].map(function (ip) {return createUser(createConnection(ip));});
+					let users = ['127.0.0.1', '127.0.0.1'].map(function (ip) {return new User(new Connection(ip));});
 					users[0].ban();
 					assert.strictEqual(users[0].connected, false);
 					assert.strictEqual(users[1].connected, false);
 				});
 
 				it('should not disconnect users at other IPs', function () {
-					var users = ['127.0.0.1', '127.0.0.2'].map(function (ip) {return createUser(createConnection(ip));});
+					let users = ['127.0.0.1', '127.0.0.2'].map(function (ip) {return new User(new Connection(ip));});
 					users[0].ban();
 					assert.strictEqual(users[1].connected, true);
 				});
 
 				it('should update IP count properly', function () {
-					var user = createUser();
+					let user = new User();
 					user.ban();
-					for (var ip in user.ips) {
+					for (let ip in user.ips) {
 						assert.strictEqual(user.ips[ip], 0);
 					}
 				});

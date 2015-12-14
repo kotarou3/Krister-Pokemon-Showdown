@@ -7,14 +7,15 @@
  * @license MIT license
  */
 
+'use strict';
+
 const LOGIN_SERVER_TIMEOUT = 15000;
 const LOGIN_SERVER_BATCH_TIME = 1000;
 
-var http = require("http");
-var url = require('url');
+const http = require("http");
+const url = require('url');
 
-/* global LoginServer: true */
-var LoginServer = module.exports = (function () {
+let LoginServer = module.exports = (function () {
 	function LoginServer(uri) {
 		console.log('Creating LoginServer object for ' + uri + '...');
 		this.uri = uri;
@@ -34,8 +35,8 @@ var LoginServer = module.exports = (function () {
 	LoginServer.prototype.lastRequest = 0;
 	LoginServer.prototype.openRequests = 0;
 
-	var getLoginServer = function (action) {
-		var uri;
+	let getLoginServer = function (action) {
+		let uri;
 		if (Config.loginServers) {
 			uri = (Config.loginServers[action] && Config.loginServers[action].uri) || (Config.loginServers[null] && Config.loginServers[null].uri) || Config.loginServer.uri;
 		} else {
@@ -53,16 +54,21 @@ var LoginServer = module.exports = (function () {
 	LoginServer.request = function (action, data, callback) {
 		return getLoginServer(action).request(action, data, callback);
 	};
-	var TimeoutError = LoginServer.TimeoutError = function (message) {
+	let TimeoutError = LoginServer.TimeoutError = function (message) {
+		Error.captureStackTrace(this, TimeoutError);
 		this.name = "TimeoutError";
 		this.message = message || "";
 	};
 	TimeoutError.prototype = Object.create(Error.prototype);
 	TimeoutError.prototype.constructor = TimeoutError;
+	TimeoutError.prototype.toString = function () {
+		if (!this.message) return this.name;
+		return this.name + ": " + this.message;
+	};
 
-	var parseJSON = function (json) {
+	let parseJSON = function (json) {
 		if (json[0] === ']') json = json.substr(1);
-		var data = {error: null};
+		let data = {error: null};
 		try {
 			data.json = JSON.parse(json);
 		} catch (err) {
@@ -77,18 +83,18 @@ var LoginServer = module.exports = (function () {
 			data = null;
 		}
 		if (this.openRequests > 5) {
-			callback(null, null, new RangeError("Request overflow"));
+			setImmediate(callback, null, null, new RangeError("Request overflow"));
 			return;
 		}
 		this.openRequests++;
-		var dataString = '';
+		let dataString = '';
 		if (data) {
-			for (var i in data) {
+			for (let i in data) {
 				dataString += '&' + i + '=' + encodeURIComponent('' + data[i]);
 			}
 		}
-		var req = http.get(url.parse(this.uri + 'action.php?act=' + action + '&serverid=' + Config.serverId + '&servertoken=' + encodeURIComponent(Config.serverToken) + '&nocache=' + new Date().getTime() + dataString), function (res) {
-			var buffer = '';
+		let req = http.get(url.parse(this.uri + 'action.php?act=' + action + '&serverid=' + Config.serverId + '&servertoken=' + encodeURIComponent(Config.serverToken) + '&nocache=' + new Date().getTime() + dataString), function (res) {
+			let buffer = '';
 			res.setEncoding('utf8');
 
 			res.on('data', function (chunk) {
@@ -96,14 +102,14 @@ var LoginServer = module.exports = (function () {
 			});
 
 			res.on('end', function () {
-				var data = parseJSON(buffer).json;
-				callback(data, res.statusCode);
+				let data = parseJSON(buffer).json;
+				setImmediate(callback, data, res.statusCode);
 				this.openRequests--;
 			});
 		});
 
 		req.on('error', function (error) {
-			callback(null, null, error);
+			setImmediate(callback, null, null, error);
 			this.openRequests--;
 		});
 
@@ -116,7 +122,7 @@ var LoginServer = module.exports = (function () {
 		}
 		if (typeof callback === 'undefined') callback = function () {};
 		if (LoginServer.disabled) {
-			callback(null, null, new Error("Ladder disabled"));
+			setImmediate(callback, null, null, new Error("Ladder disabled"));
 			return;
 		}
 		if (!data) data = {};
@@ -136,65 +142,65 @@ var LoginServer = module.exports = (function () {
 	};
 	LoginServer.prototype.makeRequests = function () {
 		this.requestTimer = null;
-		var self = this;
-		var requests = this.requestQueue;
+		let self = this;
+		let requests = this.requestQueue;
 		this.requestQueue = [];
 
 		if (!requests.length) return;
 
-		var requestCallbacks = [];
-		for (var i = 0, len = requests.length; i < len; i++) {
-			var request = requests[i];
+		let requestCallbacks = [];
+		for (let i = 0, len = requests.length; i < len; i++) {
+			let request = requests[i];
 			requestCallbacks[i] = request.callback;
 			delete request.callback;
 		}
 
 		this.requestStart(requests.length);
-		var postData = 'serverid=' + Config.serverId + '&servertoken=' + encodeURIComponent(Config.serverToken) + '&nocache=' + new Date().getTime() + '&json=' + encodeURIComponent(JSON.stringify(requests)) + '\n';
-		var requestOptions = url.parse(this.uri + 'action.php');
+		let postData = 'serverid=' + Config.serverId + '&servertoken=' + encodeURIComponent(Config.serverToken) + '&nocache=' + new Date().getTime() + '&json=' + encodeURIComponent(JSON.stringify(requests)) + '\n';
+		let requestOptions = url.parse(this.uri + 'action.php');
 		requestOptions.method = 'post';
 		requestOptions.headers = {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'Content-Length': postData.length
 		};
 
-		var req = null;
-		var onReqError = function onReqError (error) {
+		let req = null;
+		let onReqError = function onReqError(error) {
 			if (self.requestTimeoutTimer) {
 				clearTimeout(self.requestTimeoutTimer);
 				self.requestTimeoutTimer = null;
 			}
 			req.abort();
-			for (var i = 0, len = requestCallbacks.length; i < len; i++) {
-				requestCallbacks[i](null, null, error);
+			for (let i = 0, len = requestCallbacks.length; i < len; i++) {
+				setImmediate(requestCallbacks[i], null, null, error);
 			}
 			self.requestEnd();
-		};
+		}.once();
 
-		req = http.request(requestOptions, function onResponse (res) {
+		req = http.request(requestOptions, function onResponse(res) {
 			if (self.requestTimeoutTimer) {
 				clearTimeout(self.requestTimeoutTimer);
 				self.requestTimeoutTimer = null;
 			}
-			var buffer = '';
+			let buffer = '';
 			res.setEncoding('utf8');
 
-			res.on('data', function onData (chunk) {
+			res.on('data', function onData(chunk) {
 				buffer += chunk;
 			});
 
-			var endReq = function endRequest () {
+			let endReq = function endRequest() {
 				if (self.requestTimeoutTimer) {
 					clearTimeout(self.requestTimeoutTimer);
 					self.requestTimeoutTimer = null;
 				}
 				//console.log('RESPONSE: ' + buffer);
-				var data = parseJSON(buffer).json;
-				for (var i = 0, len = requestCallbacks.length; i < len; i++) {
+				let data = parseJSON(buffer).json;
+				for (let i = 0, len = requestCallbacks.length; i < len; i++) {
 					if (data) {
-						requestCallbacks[i](data[i], res.statusCode);
+						setImmediate(requestCallbacks[i], data[i], res.statusCode);
 					} else {
-						requestCallbacks[i](null, res.statusCode, new Error("Corruption"));
+						setImmediate(requestCallbacks[i], null, res.statusCode, new Error("Corruption"));
 					}
 				}
 				self.requestEnd();
@@ -202,7 +208,7 @@ var LoginServer = module.exports = (function () {
 			res.on('end', endReq);
 			res.on('close', endReq);
 
-			self.requestTimeoutTimer = setTimeout(function onDataTimeout () {
+			self.requestTimeoutTimer = setTimeout(function onDataTimeout() {
 				if (res.connection) res.connection.destroy();
 				endReq();
 			}, LOGIN_SERVER_TIMEOUT);
@@ -210,7 +216,7 @@ var LoginServer = module.exports = (function () {
 
 		req.on('error', onReqError);
 
-		req.setTimeout(LOGIN_SERVER_TIMEOUT, function onResponseTimeout () {
+		req.setTimeout(LOGIN_SERVER_TIMEOUT, function onResponseTimeout() {
 			onReqError(new TimeoutError("Response not received"));
 		});
 

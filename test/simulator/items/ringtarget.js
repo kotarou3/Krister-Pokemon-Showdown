@@ -1,5 +1,7 @@
-var battle;
-var assert = require('assert');
+'use strict';
+
+let battle;
+const assert = require('assert');
 
 describe('Ring Target', function () {
 	afterEach(function () {
@@ -15,7 +17,6 @@ describe('Ring Target', function () {
 			{species: "Girafarig", ability: 'innerfocus', item: 'ringtarget', moves: ['rest']},
 			{species: "Absol", ability: 'superluck', item: 'ringtarget', moves: ['rest']}
 		]);
-		battle.seed = [0, 0, 0, 1];
 		battle.commitDecisions();
 		assert.ok(battle.log[battle.lastMoveLine + 1].startsWith('|-supereffective|'));
 		assert.notStrictEqual(battle.p2.active[0].hp, battle.p2.active[0].maxhp);

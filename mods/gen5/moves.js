@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleMovedex = {
 	acidarmor: {
 		inherit: true,
@@ -39,12 +41,12 @@ exports.BattleMovedex = {
 					}
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) {
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) {
 				return false;
 			}
-			this.useMove(move, target);
+			this.useMove(randomMove, target);
 		}
 	},
 	assurance: {
@@ -200,18 +202,6 @@ exports.BattleMovedex = {
 		inherit: true,
 		pp: 30
 	},
-	feint: {
-		inherit: true,
-		onHit: function (target, source) {
-			var feinted = false;
-			if (target.removeVolatile('protect')) feinted = true;
-			if (target.side !== source.side) {
-				if (target.side.removeSideCondition('quickguard')) feinted = true;
-				if (target.side.removeSideCondition('wideguard')) feinted = true;
-			}
-			if (feinted) this.add('-activate', target, 'move: Feint');
-		}
-	},
 	finalgambit: {
 		inherit: true,
 		desc: "Deals damage to one adjacent target equal to the user's current HP. If this move is successful, the user faints. Makes contact.",
@@ -284,6 +274,7 @@ exports.BattleMovedex = {
 				targetPosition: target.position,
 				source: source,
 				moveData: {
+					name: "Future Sight",
 					basePower: 100,
 					category: "Special",
 					flags: {},
@@ -541,10 +532,10 @@ exports.BattleMovedex = {
 					moves.push(move.id);
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) return false;
-			this.useMove(move, target);
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) return false;
+			this.useMove(randomMove, target);
 		}
 	},
 	minimize: {
@@ -756,7 +747,7 @@ exports.BattleMovedex = {
 			if (targetAbility === sourceAbility) {
 				return false;
 			}
-			this.add('-activate', source, 'move: Skill Swap', targetAbility, sourceAbility, '[of] ' + target);
+			this.add('-activate', source, 'move: Skill Swap', this.getAbility(targetAbility), this.getAbility(sourceAbility), '[of] ' + target);
 			source.setAbility(targetAbility);
 			target.setAbility(sourceAbility);
 		}

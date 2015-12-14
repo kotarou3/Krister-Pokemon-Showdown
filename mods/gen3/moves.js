@@ -1,6 +1,9 @@
 /**
  * Gen 3 moves
  */
+
+'use strict';
+
 exports.BattleMovedex = {
 	absorb: {
 		inherit: true,
@@ -37,12 +40,12 @@ exports.BattleMovedex = {
 					}
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) {
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) {
 				return false;
 			}
-			this.useMove(move, target);
+			this.useMove(randomMove, target);
 		}
 	},
 	astonish: {
@@ -194,7 +197,38 @@ exports.BattleMovedex = {
 	doomdesire: {
 		inherit: true,
 		accuracy: 85,
-		basePower: 120
+		basePower: 120,
+		onTry: function (source, target) {
+			target.side.addSideCondition('futuremove');
+			if (target.side.sideConditions['futuremove'].positions[target.position]) {
+				return false;
+			}
+			var damage = this.getDamage(source, target, {
+				name: "Doom Desire",
+				basePower: 120,
+				category: "Physical",
+				flags: {},
+				willCrit: false,
+				type: '???'
+			}, true);
+			target.side.sideConditions['futuremove'].positions[target.position] = {
+				duration: 3,
+				move: 'doomdesire',
+				source: source,
+				moveData: {
+					id: 'doomdesire',
+					name: "Doom Desire",
+					accuracy: 85,
+					basePower: 0,
+					damage: damage,
+					category: "Physical",
+					flags: {},
+					type: '???'
+				}
+			};
+			this.add('-start', source, 'Doom Desire');
+			return null;
+		}
 	},
 	dreameater: {
 		inherit: true,
@@ -340,7 +374,38 @@ exports.BattleMovedex = {
 		inherit: true,
 		accuracy: 90,
 		basePower: 80,
-		pp: 15
+		pp: 15,
+		onTry: function (source, target) {
+			target.side.addSideCondition('futuremove');
+			if (target.side.sideConditions['futuremove'].positions[target.position]) {
+				return false;
+			}
+			var damage = this.getDamage(source, target, {
+				name: "Future Sight",
+				basePower: 80,
+				category: "Special",
+				flags: {},
+				willCrit: false,
+				type: '???'
+			}, true);
+			target.side.sideConditions['futuremove'].positions[target.position] = {
+				duration: 3,
+				move: 'futuresight',
+				source: source,
+				moveData: {
+					id: 'futuresight',
+					name: "Future Sight",
+					accuracy: 90,
+					basePower: 0,
+					damage: damage,
+					category: "Special",
+					flags: {},
+					type: '???'
+				}
+			};
+			this.add('-start', source, 'Future Sight');
+			return null;
+		}
 	},
 	gigadrain: {
 		inherit: true,
@@ -425,10 +490,10 @@ exports.BattleMovedex = {
 					moves.push(move.id);
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) return false;
-			this.useMove(move, target);
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) return false;
+			this.useMove(randomMove, target);
 		}
 	},
 	minimize: {
@@ -609,7 +674,21 @@ exports.BattleMovedex = {
 	stockpile: {
 		inherit: true,
 		pp: 10,
-		boosts: false
+		effect: {
+			onStart: function (target) {
+				this.effectData.layers = 1;
+				this.add('-start', target, 'stockpile' + this.effectData.layers);
+			},
+			onRestart: function (target) {
+				if (this.effectData.layers >= 3) return false;
+				this.effectData.layers++;
+				this.add('-start', target, 'stockpile' + this.effectData.layers);
+			},
+			onEnd: function (target) {
+				this.effectData.layers = 0;
+				this.add('-end', target, 'Stockpile');
+			}
+		}
 	},
 	struggle: {
 		inherit: true,
@@ -653,7 +732,7 @@ exports.BattleMovedex = {
 			},
 			onResidualOrder: 12,
 			onEnd: function (target) {
-				this.add('-end', target, 'move: Taunt');
+				this.add('-end', target, 'move: Taunt', '[silent]');
 			},
 			onDisableMove: function (pokemon) {
 				var moves = pokemon.moveset;
@@ -705,6 +784,28 @@ exports.BattleMovedex = {
 	waterfall: {
 		inherit: true,
 		secondary: false
+	},
+	weatherball: {
+		inherit: true,
+		onModifyMove: function (move) {
+			switch (this.effectiveWeather()) {
+			case 'sunnyday':
+				move.type = 'Fire';
+				move.category = 'Special';
+				break;
+			case 'raindance':
+				move.type = 'Water';
+				move.category = 'Special';
+				break;
+			case 'sandstorm':
+				move.type = 'Rock';
+				break;
+			case 'hail':
+				move.type = 'Ice';
+				move.category = 'Special';
+				break;
+			}
+		}
 	},
 	whirlpool: {
 		inherit: true,

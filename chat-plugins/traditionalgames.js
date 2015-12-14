@@ -4,46 +4,58 @@
 * By bumbadadabum with help from ascriptmaster, codelegend and the PS development team.
 */
 
-var http = require("http");
+'use strict';
 
-var tcgsearch = function (target, room, user, cmd, self) {
-	if (room.id !== 'traditionalgames') return self.sendReply("This command can only be used in the Traditional Games room.");
-	if (!self.canBroadcast()) return;
+const http = require('http');
 
-	var query = Tools.escapeHTML(target);
-	var host = (cmd === 'yugioh' || cmd === 'ygo') ? 'yugioh.wikia.com' : 'mtg.wikia.com';
-
-	var Search = http.get('http://' + host + '/api/v1/Search/List/?query=' + query + '&limit=1', function (a) {
-		var response = '';
-
-		a.on('data', function (data) {
-			response += data;
+function wikiaSearch(subdomain, query, callback) {
+	http.get('http://' + subdomain + '.wikia.com/api/v1/Search/List/?query=' + encodeURIComponent(query) + '&limit=1', function (res) {
+		let buffer = '';
+		res.setEncoding('utf8');
+		res.on('data', function (data) {
+			buffer += data;
 		});
-		a.on('end', function () {
-			var result;
-
+		res.on('end', function () {
+			let result;
 			try {
-				result = JSON.parse(response);
+				result = JSON.parse(buffer);
 			} catch (e) {
-				return self.sendReply("ERROR: Could not parse query:" + e);
+				return callback(e);
 			}
+			if (!result) return callback(new Error("Malformed data"));
+			if (result.exception) return callback(new Error(Tools.getString(result.exception.message) || "Not found"));
+			if (!Array.isArray(result.items) || !result.items[0] || typeof result.items[0] !== 'object') return callback(new Error("Malformed data"));
 
-			if (result.exception) {
-				self.sendReply("No articles matching your query were found.");
-			} else {
-				self.sendReplyBox("<strong>Best result for " + query + ":</strong><br/><a href=\"" + Tools.escapeHTML(result.items[0].url) + "\">" + Tools.escapeHTML(result.items[0].title) + "</a>");
-			}
-
-			room.update();
+			return callback(null, result.items[0]);
 		});
 	});
-};
+}
 
 exports.commands = {
 	ygo: 'yugioh',
 	mtg: 'yugioh',
 	magic: 'yugioh',
 	yugioh: function (target, room, user, connection, cmd) {
-		tcgsearch(target, room, user, cmd, this);
+		if (room.id !== 'traditionalgames') return this.errorReply("This command can only be used in the Traditional Games room.");
+		if (!this.canBroadcast()) return;
+		let broadcasting = this.broadcasting;
+		let subdomain = (cmd === 'yugioh' || cmd === 'ygo') ? 'yugioh' : 'mtg';
+		let query = target.trim();
+
+		wikiaSearch(subdomain, query, function (err, data) {
+			if (err) {
+				if (err instanceof SyntaxError || err.message === 'Malformed data') {
+					if (!broadcasting) return connection.sendTo(room, "Error: something went wrong in the request: " + err.message);
+					return room.add("Error: Something went wrong in the request: " + err.message).update();
+				}
+				if (!broadcasting) return connection.sendTo(room, "Error: " + err.message);
+				return room.add("Error: " + err.message).update();
+			}
+			let entryUrl = Tools.getString(data.url);
+			let entryTitle = Tools.getString(data.title);
+			let htmlReply = "<strong>Best result for " + Tools.escapeHTML(query) + ":</strong><br/><a href=\"" + Tools.escapeHTML(entryUrl) + "\">" + Tools.escapeHTML(entryTitle) + "</a>";
+			if (!broadcasting) return connection.sendTo(room, "|raw|<div class=\"infobox\">" + htmlReply + "</div>");
+			room.addRaw("<div class=\"infobox\">" + htmlReply + "</div>").update();
+		});
 	}
 };

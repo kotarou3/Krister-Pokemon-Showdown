@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleAbilities = {
 	"cutecharm": {
 		inherit: true,
@@ -88,6 +90,17 @@ exports.BattleAbilities = {
 		onAfterDamage: function (damage, target, source, move) {
 			if (source && source !== target && move && move.flags['contact']) {
 				this.damage(source.maxhp / 16, source, target);
+			}
+		}
+	},
+	"serenegrace": {
+		inherit: true,
+		onModifyMove: function (move) {
+			if (move.secondaries) {
+				this.debug('doubling secondary chance');
+				for (var i = 0; i < move.secondaries.length; i++) {
+					move.secondaries[i].chance *= 2;
+				}
 			}
 		}
 	},

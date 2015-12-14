@@ -1,6 +1,9 @@
 /**
  * Gen 2 moves
  */
+
+'use strict';
+
 exports.BattleMovedex = {
 	aeroblast: {
 		inherit: true,
@@ -13,12 +16,11 @@ exports.BattleMovedex = {
 				return false;
 			}
 			if (target.hp <= target.maxhp / 2) {
-				this.boost({atk: 2});
+				this.boost({atk: 2}, null, null, this.getEffect('bellydrum2'));
 				return false;
 			}
 			this.directDamage(target.maxhp / 2);
-			target.setBoost({atk: 6});
-			this.add('-setboost', target, 'atk', '6', '[from] move: Belly Drum');
+			this.boost({atk: 12});
 		}
 	},
 	counter: {
@@ -112,7 +114,13 @@ exports.BattleMovedex = {
 	},
 	explosion: {
 		inherit: true,
-		basePower: 250
+		basePower: 250,
+		noSketch: true
+	},
+	flail: {
+		inherit: true,
+		noDamageVariance: true,
+		willCrit: false
 	},
 	fly: {
 		inherit: true,
@@ -191,9 +199,7 @@ exports.BattleMovedex = {
 		inherit: true,
 		effect: {
 			duration: 5,
-			onModifySpD: function (spd) {
-				return spd * 2;
-			},
+			// Sp. Def boost applied directly in stat calculation
 			onStart: function (side) {
 				this.add('-sidestart', side, 'move: Light Screen');
 			},
@@ -230,11 +236,12 @@ exports.BattleMovedex = {
 					moves.push(move.id);
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) return false;
-			this.useMove(move, target);
-		}
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) return false;
+			this.useMove(randomMove, target);
+		},
+		noSketch: true
 	},
 	mirrorcoat: {
 		inherit: true,
@@ -259,6 +266,10 @@ exports.BattleMovedex = {
 		},
 		priority: -1
 	},
+	mimic: {
+		inherit: true,
+		noSketch: true
+	},
 	mirrormove: {
 		inherit: true,
 		onHit: function (pokemon) {
@@ -268,7 +279,8 @@ exports.BattleMovedex = {
 				return false;
 			}
 			this.useMove(foe.lastMove, pokemon);
-		}
+		},
+		noSketch: true
 	},
 	moonlight: {
 		inherit: true,
@@ -349,9 +361,7 @@ exports.BattleMovedex = {
 		inherit: true,
 		effect: {
 			duration: 5,
-			onModifyDef: function (def) {
-				return def * 2;
-			},
+			// Defense boost applied directly in stat calculation
 			onStart: function (side) {
 				this.add('-sidestart', side, 'Reflect');
 			},
@@ -374,6 +384,11 @@ exports.BattleMovedex = {
 		},
 		secondary: false
 	},
+	reversal: {
+		inherit: true,
+		noDamageVariance: true,
+		willCrit: false
+	},
 	roar: {
 		inherit: true,
 		onTryHit: function () {
@@ -386,7 +401,8 @@ exports.BattleMovedex = {
 	},
 	selfdestruct: {
 		inherit: true,
-		basePower: 200
+		basePower: 200,
+		noSketch: true
 	},
 	sketch: {
 		inherit: true,
@@ -418,20 +434,17 @@ exports.BattleMovedex = {
 					moves.push(move);
 				}
 			}
-			var move = '';
-			if (moves.length) move = moves[this.random(moves.length)];
-			if (!move) return false;
-			move.isSleepTalk = true;
-			this.useMove(move, pokemon);
-		}
+			var randomMove = '';
+			if (moves.length) randomMove = moves[this.random(moves.length)];
+			if (!randomMove) return false;
+			this.useMove(randomMove, pokemon);
+		},
+		noSketch: true
 	},
 	solarbeam: {
 		inherit: true,
-		onBasePower: function (basePower, pokemon, target) {
-			if (this.isWeather('raindance')) {
-				return this.chainModify(0.5);
-			}
-		}
+		// Rain weakening done directly in the damage formula
+		onBasePower: function () {}
 	},
 	spikes: {
 		inherit: true,
@@ -446,10 +459,9 @@ exports.BattleMovedex = {
 				}
 			},
 			onSwitchIn: function (pokemon) {
-				var side = pokemon.side;
 				if (!pokemon.runImmunity('Ground')) return;
 				var damageAmounts = [0, 3];
-				var damage = this.damage(damageAmounts[this.effectData.layers] * pokemon.maxhp / 24);
+				this.damage(damageAmounts[this.effectData.layers] * pokemon.maxhp / 24);
 			}
 		}
 	},
@@ -472,6 +484,7 @@ exports.BattleMovedex = {
 					return;
 				}
 				if (move.drain) {
+					this.add('-hint', "In Gold/Silver/Crystal, draining moves always miss against Substitute.");
 					this.add('-miss', source);
 					return null;
 				}
@@ -547,6 +560,10 @@ exports.BattleMovedex = {
 	toxic: {
 		inherit: true,
 		ignoreImmunity: false
+	},
+	transform: {
+		inherit: true,
+		noSketch: true
 	},
 	triattack: {
 		inherit: true,

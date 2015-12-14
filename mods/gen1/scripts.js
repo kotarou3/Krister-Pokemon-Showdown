@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Gen 1 mechanics are fairly different to those we know on current gen.
  * Therefor we need to make a lot of changes to the battle engine for this game simulation.
@@ -37,8 +39,8 @@ exports.BattleScripts = {
 		},
 		// In generation 1, boosting function increases the stored modified stat and checks for opponent's status.
 		boostBy: function (boost) {
-			var changed = false;
-			for (var i in boost) {
+			let changed = false;
+			for (let i in boost) {
 				this.boosts[i] += boost[i];
 				if (this.boosts[i] > 6) {
 					this.boosts[i] = 6;
@@ -50,7 +52,7 @@ exports.BattleScripts = {
 					changed = true;
 					// Recalculate the modified stat
 					if (this.stats[i]) {
-						var stat = this.template.baseStats[i];
+						let stat = this.template.baseStats[i];
 						stat = Math.floor(Math.floor(2 * stat + this.set.ivs[i] + Math.floor(this.set.evs[i] / 4)) * this.level / 100 + 5);
 						this.modifiedStats[i] = this.stats[i] = Math.floor(stat);
 						if (this.boosts[i] >= 0) {
@@ -94,7 +96,7 @@ exports.BattleScripts = {
 			}
 		}
 		pokemon.lastDamage = 0;
-		var lockedMove = this.runEvent('LockMove', pokemon);
+		let lockedMove = this.runEvent('LockMove', pokemon);
 		if (lockedMove === true) lockedMove = false;
 		if (!lockedMove && (!pokemon.volatiles['partialtrappinglock'] || pokemon.volatiles['partialtrappinglock'].locked !== target)) {
 			pokemon.deductPP(move, null, target);
@@ -129,19 +131,21 @@ exports.BattleScripts = {
 				} else {
 					if (pokemon.volatiles['partialtrappinglock'].locked !== target && target !== pokemon) {
 						// The target switched, therefor, we must re-roll the duration, damage, and accuracy.
-						var duration = [2, 2, 2, 3, 3, 3, 4, 5][this.random(8)];
+						let duration = [2, 2, 2, 3, 3, 3, 4, 5][this.random(8)];
 						pokemon.volatiles['partialtrappinglock'].duration = duration;
 						pokemon.volatiles['partialtrappinglock'].locked = target;
 						// Duration reset thus partially trapped at 2 always.
 						target.volatiles['partiallytrapped'].duration = 2;
 						// We get the move position for the PP change.
-						var usedMovePos = -1;
-						for (var m in pokemon.moveset) {
+						let usedMovePos = -1;
+						for (let m in pokemon.moveset) {
 							if (pokemon.moveset[m].id === move.id) usedMovePos = m;
 						}
 						if (usedMovePos > -1 && pokemon.moveset[usedMovePos].pp === 0) {
 							// If we were on the middle of the 0 PP sequence, the PPs get reset to 63.
 							pokemon.moveset[usedMovePos].pp = 63;
+							pokemon.isStale = 2;
+							pokemon.isStaleSource = 'ppoverflow';
 						}
 					}
 				}
@@ -154,7 +158,7 @@ exports.BattleScripts = {
 	useMove: function (move, pokemon, target, sourceEffect) {
 		if (!sourceEffect && this.effect.id) sourceEffect = this.effect;
 		move = this.getMove(move);
-		var baseMove = move;
+		let baseMove = move;
 		move = this.getMoveCopy(move);
 		if (!target) target = this.resolveTarget(pokemon, move);
 		if (move.target === 'self') {
@@ -176,8 +180,7 @@ exports.BattleScripts = {
 		}
 		if (!move) return false;
 
-		var attrs = '';
-		var missed = false;
+		let attrs = '';
 		if (pokemon.fainted) {
 			// Removing screens upon faint.
 			pokemon.side.removeSideCondition('reflect');
@@ -203,7 +206,7 @@ exports.BattleScripts = {
 			move.ignoreImmunity = (move.category === 'Status');
 		}
 
-		var damage = false;
+		let damage = false;
 		if (target.fainted) {
 			this.attrLastMove('[notarget]');
 			this.add('-notarget');
@@ -234,9 +237,9 @@ exports.BattleScripts = {
 	// This function attempts a move hit and returns the attempt result before the actual hit happens.
 	// It deals with partial trapping weirdness and accuracy bugs as well.
 	tryMoveHit: function (target, pokemon, move, spreadHit) {
-		var boostTable = [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
-		var doSelfDestruct = true;
-		var damage = 0;
+		let boostTable = [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
+		let doSelfDestruct = true;
+		let damage = 0;
 
 		// First, check if the Pokémon is immune to this move.
 		if (move.ignoreImmunity !== true && !move.ignoreImmunity[move.type] && !target.runImmunity(move.type, true)) {
@@ -247,7 +250,7 @@ exports.BattleScripts = {
 		}
 
 		// Now, let's calculate the accuracy.
-		var accuracy = move.accuracy;
+		let accuracy = move.accuracy;
 
 		// Partial trapping moves: true accuracy while it lasts
 		if (move.volatileStatus === 'partiallytrapped' && pokemon.volatiles['partialtrappinglock'] && target === pokemon.volatiles['partialtrappinglock'].locked) {
@@ -269,12 +272,7 @@ exports.BattleScripts = {
 
 		// Calculate true accuracy for gen 1, which uses 0-255.
 		if (accuracy !== true) {
-			// Rage bug
-			if (move.id === 'rage' && pokemon.volatiles['ragemiss']) {
-				accuracy = 1;
-			} else {
-				accuracy = Math.floor(accuracy * 255 / 100);
-			}
+			accuracy = Math.floor(accuracy * 255 / 100);
 			// Check also for accuracy modifiers.
 			if (!move.ignoreAccuracy) {
 				if (pokemon.boosts.accuracy > 0) {
@@ -306,7 +304,7 @@ exports.BattleScripts = {
 		if (damage !== false) {
 			pokemon.lastDamage = 0;
 			if (move.multihit) {
-				var hits = move.multihit;
+				let hits = move.multihit;
 				if (hits.length) {
 					// Yes, it's hardcoded... meh
 					if (hits[0] === 2 && hits[1] === 5) {
@@ -317,9 +315,9 @@ exports.BattleScripts = {
 				}
 				hits = Math.floor(hits);
 				// In gen 1, all the hits have the same damage for multihits move
-				var moveDamage = 0;
-				var firstDamage;
-				var i;
+				let moveDamage = 0;
+				let firstDamage;
+				let i;
 				for (i = 0; i < hits && target.hp && pokemon.hp; i++) {
 					if (i === 0) {
 						// First hit, we calculate
@@ -373,11 +371,11 @@ exports.BattleScripts = {
 	// It deals with the actual move hit, as the name indicates, dealing damage and/or effects.
 	// This function also deals with the Gen 1 Substitute behaviour on the hitting process.
 	moveHit: function (target, pokemon, move, moveData, isSecondary, isSelf) {
-		var damage = 0;
+		let damage = 0;
 		move = this.getMoveCopy(move);
 
 		if (!isSecondary && !isSelf) this.setActiveMove(move, pokemon, target);
-		var hitResult = true;
+		let hitResult = true;
 		if (!moveData) moveData = move;
 
 		if (move.ignoreImmunity === undefined) {
@@ -385,8 +383,8 @@ exports.BattleScripts = {
 		}
 
 		// We get the sub to the target to see if it existed
-		var targetSub = (target) ? target.volatiles['substitute'] : false;
-		var targetHadSub = (targetSub !== null && targetSub !== false && (typeof targetSub !== 'undefined'));
+		let targetSub = (target) ? target.volatiles['substitute'] : false;
+		let targetHadSub = (targetSub !== null && targetSub !== false && (typeof targetSub !== 'undefined'));
 
 		if (target) {
 			hitResult = this.singleEvent('TryHit', moveData, {}, target, pokemon, move);
@@ -427,7 +425,7 @@ exports.BattleScripts = {
 		}
 
 		if (target) {
-			var didSomething = false;
+			let didSomething = false;
 
 			damage = this.getDamage(pokemon, target, moveData);
 
@@ -479,7 +477,7 @@ exports.BattleScripts = {
 				}
 			}
 			if (moveData.heal && !target.fainted) {
-				var d = target.heal(Math.floor(target.maxhp * moveData.heal[0] / moveData.heal[1]));
+				let d = target.heal(Math.floor(target.maxhp * moveData.heal[0] / moveData.heal[1]));
 				if (!d) {
 					this.add('-fail', target);
 					return false;
@@ -537,16 +535,16 @@ exports.BattleScripts = {
 				return false;
 			}
 		}
-		var targetHasSub = false;
+		let targetHasSub = false;
 		if (target) {
-			var targetSub = target.getVolatile('substitute');
+			let targetSub = target.getVolatile('substitute');
 			if (targetSub !== null) {
 				targetHasSub = (targetSub.hp > 0);
 			}
 		}
 
 		// Here's where self effects are applied.
-		var doSelf = (targetHadSub && targetHasSub) || !targetHadSub;
+		let doSelf = (targetHadSub && targetHasSub) || !targetHadSub;
 		if (moveData.self && (doSelf || moveData.self.volatileStatus === 'partialtrappinglock')) {
 			this.moveHit(pokemon, pokemon, move, moveData.self, isSecondary, true);
 		}
@@ -558,13 +556,13 @@ exports.BattleScripts = {
 
 		// Apply move secondaries.
 		if (moveData.secondaries) {
-			for (var i = 0; i < moveData.secondaries.length; i++) {
+			for (let i = 0; i < moveData.secondaries.length; i++) {
 				// We check here whether to negate the probable secondary status if it's para, burn, or freeze.
 				// In the game, this is checked and if true, the random number generator is not called.
 				// That means that a move that does not share the type of the target can status it.
 				// If a move that was not fire-type would exist on Gen 1, it could burn a Pokémon.
 				if (!(moveData.secondaries[i].status && moveData.secondaries[i].status in {'par':1, 'brn':1, 'frz':1} && target && target.hasType(move.type))) {
-					var effectChance = Math.floor(moveData.secondaries[i].chance * 255 / 100);
+					let effectChance = Math.floor(moveData.secondaries[i].chance * 255 / 100);
 					if (typeof moveData.secondaries[i].chance === 'undefined' || this.random(256) < effectChance) {
 						this.moveHit(target, pokemon, move, moveData.secondaries[i], true, isSelf);
 					}
@@ -588,11 +586,11 @@ exports.BattleScripts = {
 		if (!target || !target.hp) return 0;
 		effect = this.getEffect(effect);
 		boost = this.runEvent('Boost', target, source, effect, Object.clone(boost));
-		for (var i in boost) {
-			var currentBoost = {};
+		for (let i in boost) {
+			let currentBoost = {};
 			currentBoost[i] = boost[i];
 			if (boost[i] !== 0 && target.boostBy(currentBoost)) {
-				var msg = '-boost';
+				let msg = '-boost';
 				if (boost[i] < 0) {
 					msg = '-unboost';
 					boost[i] = -boost[i];
@@ -647,7 +645,7 @@ exports.BattleScripts = {
 		if (!(effect.id in {'recoil':1, 'drain':1}) && effect.effectType !== 'Status') target.battle.lastDamage = damage;
 		damage = target.damage(damage, source, effect);
 		if (source) source.lastDamage = damage;
-		var name = effect.fullname;
+		let name = effect.fullname;
 		if (name === 'tox') name = 'psn';
 		switch (effect.id) {
 		case 'partiallytrapped':
@@ -726,12 +724,14 @@ exports.BattleScripts = {
 	getDamage: function (pokemon, target, move, suppressMessages) {
 		// First of all, we get the move.
 		if (typeof move === 'string') move = this.getMove(move);
-		if (typeof move === 'number') move = {
-			basePower: move,
-			type: '???',
-			category: 'Physical',
-			flags: {}
-		};
+		if (typeof move === 'number') {
+			move = {
+				basePower: move,
+				type: '???',
+				category: 'Physical',
+				flags: {}
+			};
+		}
 
 		// Let's see if the target is immune to the move.
 		if (!move.ignoreImmunity || (move.ignoreImmunity !== true && !move.ignoreImmunity[move.type])) {
@@ -775,10 +775,10 @@ exports.BattleScripts = {
 		if (!move.defensiveCategory) move.defensiveCategory = move.category;
 		// '???' is typeless damage: used for Struggle and Confusion etc
 		if (!move.type) move.type = '???';
-		var type = move.type;
+		let type = move.type;
 
 		// We get the base power and apply basePowerCallback if necessary.
-		var basePower = move.basePower;
+		let basePower = move.basePower;
 		if (move.basePowerCallback) {
 			basePower = move.basePowerCallback.call(this, pokemon, target, move);
 		}
@@ -795,7 +795,7 @@ exports.BattleScripts = {
 		if (!move.crit) {
 			// In gen 1, the critical chance is based on speed.
 			// First, we get the base speed, divide it by 2 and floor it. This is our current crit chance.
-			var critChance = Math.floor(pokemon.template.baseStats['spe'] / 2);
+			let critChance = Math.floor(pokemon.template.baseStats['spe'] / 2);
 
 			// Now we check for focus energy volatile.
 			if (pokemon.volatiles['focusenergy']) {
@@ -834,15 +834,15 @@ exports.BattleScripts = {
 		basePower = this.clampIntRange(basePower, 1);
 
 		// We now check attacker's and defender's stats.
-		var level = pokemon.level;
-		var attacker = pokemon;
-		var defender = target;
+		let level = pokemon.level;
+		let attacker = pokemon;
+		let defender = target;
 		if (move.useTargetOffensive) attacker = target;
 		if (move.useSourceDefensive) defender = pokemon;
-		var atkType = (move.category === 'Physical') ? 'atk' : 'spa';
-		var defType = (move.defensiveCategory === 'Physical') ? 'def' : 'spd';
-		var attack = attacker.getStat(atkType);
-		var defense = defender.getStat(defType);
+		let atkType = (move.category === 'Physical') ? 'atk' : 'spa';
+		let defType = (move.defensiveCategory === 'Physical') ? 'def' : 'spd';
+		let attack = attacker.getStat(atkType);
+		let defense = defender.getStat(defType);
 		// In gen 1, screen effect is applied here.
 		if ((defType === 'def' && defender.volatiles['reflect']) || (defType === 'spd' && defender.volatiles['lightscreen'])) {
 			this.debug('Screen doubling (Sp)Def');
@@ -884,7 +884,7 @@ exports.BattleScripts = {
 
 		// Let's go with the calculation now that we have what we need.
 		// We do it step by step just like the game does.
-		var damage = level * 2;
+		let damage = level * 2;
 		damage = Math.floor(damage / 5);
 		damage += 2;
 		damage *= basePower;
@@ -900,7 +900,7 @@ exports.BattleScripts = {
 
 		// Type effectiveness.
 		// The order here is not correct, must change to check the move versus each type.
-		var totalTypeMod = this.getEffectiveness(type, target);
+		let totalTypeMod = this.getEffectiveness(type, target);
 		// Super effective attack
 		if (totalTypeMod > 0) {
 			if (!suppressMessages) this.add('-supereffective', target);
@@ -939,44 +939,50 @@ exports.BattleScripts = {
 	// This is random teams making for gen 1.
 	// Challenge Cup or CC teams are basically fully random teams.
 	randomCCTeam: function (side) {
-		var teamdexno = [];
-		var team = [];
+		let team = [];
+
+		let hasDexNumber = {};
+		let formes = [[], [], [], [], [], []];
 
 		// Pick six random Pokémon, no repeats.
-		for (var i = 0; i < 6; i++) {
-			while (true) {
-				var x = Math.floor(Math.random() * 151) + 1;
-				if (teamdexno.indexOf(x) < 0) {
-					teamdexno.push(x);
-					break;
-				}
+		let num;
+		for (let i = 0; i < 6; i++) {
+			do {
+				num = this.random(151) + 1;
+			} while (num in hasDexNumber);
+			hasDexNumber[num] = i;
+		}
+
+		let formeCounter = 0;
+		for (let id in this.data.Pokedex) {
+			if (!(this.data.Pokedex[id].num in hasDexNumber)) continue;
+			let template = this.getTemplate(id);
+			if (!template.learnset || template.forme) continue;
+			formes[hasDexNumber[template.num]].push(template.species);
+			if (++formeCounter >= 6) {
+				// Gen 1 had no alternate formes, so we can break out of the loop already.
+				break;
 			}
 		}
 
-		for (var i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++) {
 			// Choose forme.
-			var formes = [];
-			for (var j in this.data.Pokedex) {
-				if (this.data.Pokedex[j].num === teamdexno[i] && this.getTemplate(this.data.Pokedex[j].species).learnset && this.data.Pokedex[j].species !== 'Pichu-Spiky-eared') {
-					formes.push(this.data.Pokedex[j].species);
-				}
-			}
-			var poke = formes.sample();
-			var template = this.getTemplate(poke);
+			let poke = formes[i][this.random(formes[i].length)];
+			let template = this.getTemplate(poke);
 
 			// Level balance: calculate directly from stats rather than using some silly lookup table.
-			var mbstmin = 1307;
-			var stats = template.baseStats;
+			let mbstmin = 1307;
+			let stats = template.baseStats;
 
 			// Modified base stat total assumes 15 DVs, 255 EVs in every stat
-			var mbst = (stats["hp"] * 2 + 30 + 63 + 100) + 10;
+			let mbst = (stats["hp"] * 2 + 30 + 63 + 100) + 10;
 			mbst += (stats["atk"] * 2 + 30 + 63 + 100) + 5;
 			mbst += (stats["def"] * 2 + 30 + 63 + 100) + 5;
 			mbst += (stats["spa"] * 2 + 30 + 63 + 100) + 5;
 			mbst += (stats["spd"] * 2 + 30 + 63 + 100) + 5;
 			mbst += (stats["spe"] * 2 + 30 + 63 + 100) + 5;
 
-			var level = Math.floor(100 * mbstmin / mbst); // Initial level guess will underestimate
+			let level = Math.floor(100 * mbstmin / mbst); // Initial level guess will underestimate
 
 			while (level < 100) {
 				mbst = Math.floor((stats["hp"] * 2 + 30 + 63 + 100) * level / 100 + 10);
@@ -991,38 +997,29 @@ exports.BattleScripts = {
 			}
 
 			// Random DVs.
-			var ivs = {
-				hp: Math.floor(Math.random() * 30),
-				atk: Math.floor(Math.random() * 30),
-				def: Math.floor(Math.random() * 30),
-				spa: Math.floor(Math.random() * 30),
-				spd: Math.floor(Math.random() * 30),
-				spe: Math.floor(Math.random() * 30)
+			let ivs = {
+				hp: this.random(30),
+				atk: this.random(30),
+				def: this.random(30),
+				spa: this.random(30),
+				spd: this.random(30),
+				spe: this.random(30)
 			};
 
-			// All EVs.
-			var evs = {
-				hp: 255,
-				atk: 255,
-				def: 255,
-				spa: 255,
-				spd: 255,
-				spe: 255
-			};
+			// Maxed EVs.
+			let evs = {hp: 255, atk: 255, def: 255, spa: 255, spd: 255,	spe: 255};
 
 			// Four random unique moves from movepool. don't worry about "attacking" or "viable".
 			// Since Gens 1 and 2 learnsets are shared, we need to weed out Gen 2 moves.
-			var moves;
-			var pool = [];
-			for (var move in template.learnset) {
+			let moves;
+			let pool = [];
+			for (let move in template.learnset) {
 				if (this.getMove(move).gen === 1) pool.push(move);
 			}
-			if (pool.length > 4) {
-				moves = pool.sample(4);
-			} else if (pool.length > 0) {
+			if (pool.length <= 4) {
 				moves = pool;
 			} else {
-				moves = ['struggle'];
+				moves = [this.sampleNoReplace(pool), this.sampleNoReplace(pool), this.sampleNoReplace(pool), this.sampleNoReplace(pool)];
 			}
 
 			team.push({
@@ -1044,138 +1041,161 @@ exports.BattleScripts = {
 	// Random team generation for Gen 1 Random Battles.
 	randomTeam: function (side) {
 		// Get what we need ready.
-		var keys = [];
-		var pokemonLeft = 0;
-		var pokemon = [];
-		var i = 1;
+		let pokemonLeft = 0;
+		let pokemon = [];
 
-		// We need to check it's one of the first 151 because formats data are installed onto main format data, not replaced.
-		for (var n in this.data.FormatsData) {
-			if (this.data.FormatsData[n].randomBattleMoves && i < 152) {
-				keys.push(n);
-			}
-			i++;
+		let handicapMons = {'magikarp':1, 'weedle':1, 'kakuna':1, 'caterpie':1, 'metapod':1, 'ditto':1};
+		let nuTiers = {'UU':1, 'BL':1, 'NFE':1, 'LC':1, 'NU':1};
+		let uuTiers = {'NFE':1, 'UU':1, 'BL':1, 'NU':1};
+
+		let n = 1;
+		let pokemonPool = [];
+		for (let id in this.data.FormatsData) {
+			// FIXME: Not ES-compliant
+			if (n++ > 151 || !this.data.FormatsData[id].randomBattleMoves) continue;
+			pokemonPool.push(id);
 		}
-		keys = keys.randomize();
 
 		// Now let's store what we are getting.
-		var typeCount = {};
-		var weaknessCount = {'electric':0, 'psychic':0, 'water':0, 'ice':0};
-		var uberCount = 0;
-		var nuCount = 0;
-		var hasShitmon = false;
+		let typeCount = {};
+		let weaknessCount = {'Electric':0, 'Psychic':0, 'Water':0, 'Ice':0};
+		let uberCount = 0;
+		let nuCount = 0;
+		let hasShitmon = false;
 
-		for (var i = 0; i < keys.length && pokemonLeft < 6; i++) {
-			var template = this.getTemplate(keys[i]);
-			if (!template || !template.name || !template.types) continue;
+		while (pokemonPool.length && pokemonLeft < 6) {
+			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			if (!template.exists) continue;
 
 			// Bias the tiers so you get less shitmons and only one of the two Ubers.
 			// If you have a shitmon, you're covered in OUs and Ubers if possible
-			var tier = template.tier;
-			if (tier === 'LC' && (nuCount > 1 || hasShitmon)) continue;
-			if ((tier === 'NFE' || tier === 'UU' || tier === 'NU') && (hasShitmon || (nuCount > 2 && this.random(1)))) continue;
-			// Unless you have one of the worst mons, in that case we allow luck to give you both Mew and Mewtwo.
-			if (tier === 'Uber' && uberCount >= 1 && !hasShitmon) continue;
+			if ((template.speciesid in handicapMons) && nuCount > 1) continue;
 
-			// We need a weakness count of spammable attacks to avoid being swept by those.
-			// Spammable attacks are: Thunderbolt, Psychic, Surf, Blizzard.
-			var skip = false;
-			Object.keys(weaknessCount).forEach(function (type) {
-				var notImmune = Tools.getImmunity(type, template);
-				if (notImmune && Tools.getEffectiveness(type, template) > 0) {
-					weaknessCount[type]++;
-				}
-				if (weaknessCount[type] > 2) skip = true;
-			});
-			if (skip) continue;
+			let tier = template.tier;
+			switch (tier) {
+			case 'LC':
+				if (nuCount > 1 || hasShitmon) continue;
+				break;
+			case 'Uber':
+				// Unless you have one of the worst mons, in that case we allow luck to give you all Ubers.
+				if (uberCount >= 1 && !hasShitmon) continue;
+				break;
+			default:
+				if (uuTiers[tier] && (hasShitmon || (nuCount > 2 && this.random(2) >= 1))) continue;
+			}
+
+			let skip = false;
 
 			// Limit 2 of any type as well. Diversity and minor weakness count.
 			// The second of a same type has halved chance of being added.
-			var types = template.types;
-			for (var t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 || (typeCount[types[t]] === 1 && this.random(1))) {
+			let types = template.types;
+			for (let t = 0; t < types.length; t++) {
+				if (typeCount[types[t]] > 1 || (typeCount[types[t]] === 1 && this.random(2))) {
 					skip = true;
 					break;
 				}
 			}
 			if (skip) continue;
 
+			// We need a weakness count of spammable attacks to avoid being swept by those.
+			// Spammable attacks are: Thunderbolt, Psychic, Surf, Blizzard.
+			let pokemonWeaknesses = [];
+			for (let type in weaknessCount) {
+				let increaseCount = Tools.getImmunity(type, template) && Tools.getEffectiveness(type, template) > 0;
+				if (!increaseCount) continue;
+				if (weaknessCount[type] >= 2) {
+					skip = true;
+					break;
+				}
+				pokemonWeaknesses.push(type);
+			}
+
+			if (skip) continue;
+
 			// The set passes the limitations.
-			var set = this.randomSet(template, i);
+			let set = this.randomSet(template, pokemon.length);
 			pokemon.push(set);
 
 			// Now let's increase the counters. First, the Pokémon left.
 			pokemonLeft++;
 
 			// Type counter.
-			for (var t = 0; t < types.length; t++) {
-				if (types[t] in typeCount) {
+			for (let t = 0; t < types.length; t++) {
+				if (typeCount[types[t]]) {
 					typeCount[types[t]]++;
 				} else {
 					typeCount[types[t]] = 1;
 				}
 			}
 
-			// Increment type bias counters.
+			// Weakness counter.
+			for (let t = 0; t < pokemonWeaknesses.length; t++) {
+				weaknessCount[pokemonWeaknesses[t]]++;
+			}
+
+			// Increment tier bias counters.
 			if (tier === 'Uber') {
 				uberCount++;
-			} else if (tier === 'UU' || tier === 'NU' || tier === 'NFE' || tier === 'LC') {
+			} else if (nuTiers[tier]) {
 				nuCount++;
 			}
 
 			// Is it Magikarp?
-			if (keys[i] in {'magikarp':1, 'weedle':1, 'kakuna':1, 'caterpie':1, 'metapod':1, 'ditto':1}) hasShitmon = true;
+			if (template.speciesid in handicapMons) hasShitmon = true;
 		}
 
 		return pokemon;
 	},
 	// Random set generation for Gen 1 Random Battles.
-	randomSet: function (template, i) {
-		if (i === undefined) i = 1;
+	randomSet: function (template, slot) {
+		if (slot === undefined) slot = 1;
 		template = this.getTemplate(template);
 		if (!template.exists) template = this.getTemplate('pikachu'); // Because Gen 1.
 
-		var moveKeys = template.randomBattleMoves;
-		moveKeys = moveKeys.randomize();
-		var moves = [];
-		var hasType = {};
+		let movePool = template.randomBattleMoves.slice();
+		let moves = [];
+		let hasType = {};
 		hasType[template.types[0]] = true;
 		if (template.types[1]) hasType[template.types[1]] = true;
-		var hasMove = {};
-		var counter = {};
-		var setupType = '';
+		let hasMove = {};
+		let counter = {};
+		let setupType = '';
 
-		var j = 0;
+		// Moves that boost Attack:
+		let PhysicalSetup = {
+			swordsdance:1, sharpen:1
+		};
+		// Moves which boost Special Attack:
+		let SpecialSetup = {
+			amnesia:1, growth:1
+		};
+
+		// Add the mandatory move
+		if (template.essentialMove) {
+			moves.push(template.essentialMove);
+		}
 		do {
 			// Choose next 4 moves from learnset/viable moves and add them to moves list:
-			var howMany = (template.essentialMove) ? 3 : 4;
-			while (moves.length < howMany && j < moveKeys.length) {
-				var moveid = toId(moveKeys[j]);
-				j++;
+			while (moves.length < 4 && movePool.length) {
+				let moveid = this.sampleNoReplace(movePool);
 				moves.push(moveid);
 			}
 
-			// Add now the mandatory move
-			if (template.essentialMove) {
-				moves.unshift(template.essentialMove);
-				j++;
-			}
-
-			// Only do move choosing if we have more than four on the moveset...
-			if (moveKeys.length > howMany) {
+			// Only do move choosing if we have backup moves in the pool...
+			if (movePool.length) {
 				hasMove = {};
 				counter = {Physical: 0, Special: 0, Status: 0, physicalsetup: 0, specialsetup: 0};
-				for (var k = 0; k < moves.length; k++) {
-					var move = this.getMove(moves[k]);
-					var moveid = move.id;
+				for (let k = 0; k < moves.length; k++) {
+					let move = this.getMove(moves[k]);
+					let moveid = move.id;
 					hasMove[moveid] = true;
 					if (!move.damage && !move.damageCallback) {
 						counter[move.category]++;
 					}
-					if ({swordsdance:1, sharpen:1}[moveid]) {
+					if (PhysicalSetup[moveid]) {
 						counter['physicalsetup']++;
 					}
-					if ({amnesia:1, growth:1}[moveid]) {
+					if (SpecialSetup[moveid]) {
 						counter['specialsetup']++;
 					}
 				}
@@ -1186,14 +1206,12 @@ exports.BattleScripts = {
 					setupType = 'Physical';
 				}
 
-				for (var k = 0; k < moves.length; k++) {
-					var moveid = moves[k];
-					var move = this.getMove(moveid);
-					var rejected = false;
-					if (hasMove[moveid]) rejected = true;
+				for (let k = 0; k < moves.length; k++) {
+					let moveid = moves[k];
+					if (moveid === template.essentialMove) continue;
+					let move = this.getMove(moveid);
+					let rejected = false;
 					if (!template.essentialMove || moveid !== template.essentialMove) {
-						var isSetup = false;
-
 						switch (moveid) {
 						// bad after setup
 						case 'seismictoss': case 'nightshade':
@@ -1242,7 +1260,7 @@ exports.BattleScripts = {
 							if (counter['Special'] > counter['Physical'] || hasMove['slash'] || !counter['Physical'] || hasMove['growth']) rejected = true;
 							break;
 						case 'growth':
-							if (counter['Special'] < counter['Physical'] || hasMove['swordsdance']) rejected = true;
+							if (counter['Special'] < counter['Physical'] || hasMove['swordsdance'] || hasMove['amnesia']) rejected = true;
 							break;
 						case 'doubleedge':
 							if (hasMove['bodyslam']) rejected = true;
@@ -1277,9 +1295,6 @@ exports.BattleScripts = {
 						case 'triattack':
 							if (hasMove['doubleedge']) rejected = true;
 							break;
-						case 'growth':
-							if (hasMove['amnesia']) rejected = true;
-							break;
 						case 'fissure':
 							if (hasMove['horndrill']) rejected = true;
 							break;
@@ -1300,16 +1315,16 @@ exports.BattleScripts = {
 							break;
 						} // End of switch for moveid
 					}
-					if (rejected && j < moveKeys.length) {
+					if (rejected) {
 						moves.splice(k, 1);
 						break;
 					}
 					counter[move.category]++;
 				} // End of for
 			} // End of the check for more than 4 moves on moveset.
-		} while (moves.length < 4 && j < moveKeys.length);
+		} while (moves.length < 4 && movePool.length);
 
-		var levelScale = {
+		let levelScale = {
 			LC: 96,
 			NFE: 90,
 			NU: 90,
@@ -1318,12 +1333,12 @@ exports.BattleScripts = {
 			Uber: 74
 		};
 		// Really bad Pokemon and jokemons, MEWTWO, Pokémon with higher tier in Wrap metas.
-		var customScale = {
+		let customScale = {
 			Caterpie: 99, Kakuna: 99, Magikarp: 99, Metapod: 99, Weedle: 99,
 			Clefairy: 95, "Farfetch'd": 99, Jigglypuff: 99, Ditto: 99, Mewtwo: 70,
 			Dragonite: 85, Cloyster: 83, Staryu: 90
 		};
-		var level = levelScale[template.tier] || 90;
+		let level = levelScale[template.tier] || 90;
 		if (customScale[template.name]) level = customScale[template.name];
 		if (template.name === 'Mewtwo' && hasMove['amnesia']) level = 68;
 

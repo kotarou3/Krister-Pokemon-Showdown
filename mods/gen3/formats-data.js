@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleFormatsData = {
 	missingno: {
 		isNonstandard: true,
@@ -952,6 +954,7 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":30,"moves":["pound","transform","megapunch","metronome"]},
 			{"generation":3,"level":10,"moves":["pound","transform"]}
 		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	chikorita: {
@@ -1400,6 +1403,7 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":70,"abilities":["pressure"],"moves":["recover","hydropump","raindance","swift"]},
 			{"generation":3,"level":50,"abilities":["pressure"],"moves":["psychoboost","earthquake","hydropump","featherdance"]}
 		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	hooh: {
@@ -1408,6 +1412,7 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":70,"abilities":["pressure"],"moves":["swift","sunnyday","fireblast","recover"]},
 			{"generation":3,"level":70,"abilities":["pressure"],"moves":["recover","fireblast","sunnyday","swift"]}
 		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	celebi: {
@@ -1418,7 +1423,7 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":10,"abilities":["naturalcure"],"moves":["leechseed","recover","healbell","safeguard"]},
 			{"generation":3,"level":30,"abilities":["naturalcure"],"moves":["healbell","safeguard","ancientpower","futuresight"]}
 		],
-		unobtainableShiny: true,
+		eventOnly: true,
 		tier: "OU"
 	},
 	treecko: {
@@ -2183,6 +2188,7 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":5,"abilities":["serenegrace"],"moves":["wish","confusion","rest"]},
 			{"generation":3,"level":30,"abilities":["serenegrace"],"moves":["helpinghand","psychic","refresh","rest"]}
 		],
+		eventOnly: true,
 		tier: "OU"
 	},
 	deoxys: {
@@ -2193,36 +2199,22 @@ exports.BattleFormatsData = {
 			{"generation":3,"level":30,"abilities":["pressure"],"moves":["swift","psychic","pursuit","knockoff"]},
 			{"generation":3,"level":70,"abilities":["pressure"],"moves":["cosmicpower","recover","psychoboost","hyperbeam"]}
 		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	deoxysattack: {
 		randomBattleMoves: ["psychoboost","superpower","extremespeed","icebeam","thunderbolt","firepunch","spikes","stealthrock"],
-		eventPokemon: [
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["snatch","psychic","spikes","knockoff"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["superpower","psychic","pursuit","taunt"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["swift","psychic","pursuit","knockoff"]},
-			{"generation":3,"level":70,"abilities":["pressure"],"moves":["cosmicpower","recover","psychoboost","hyperbeam"]}
-		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	deoxysdefense: {
 		randomBattleMoves: ["spikes","stealthrock","recover","taunt","toxic","agility","seismictoss","magiccoat"],
-		eventPokemon: [
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["snatch","psychic","spikes","knockoff"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["superpower","psychic","pursuit","taunt"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["swift","psychic","pursuit","knockoff"]},
-			{"generation":3,"level":70,"abilities":["pressure"],"moves":["cosmicpower","recover","psychoboost","hyperbeam"]}
-		],
+		eventOnly: true,
 		tier: "Uber"
 	},
 	deoxysspeed: {
 		randomBattleMoves: ["spikes","stealthrock","superpower","icebeam","psychoboost","taunt","lightscreen","reflect","magiccoat","trick"],
-		eventPokemon: [
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["snatch","psychic","spikes","knockoff"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["superpower","psychic","pursuit","taunt"]},
-			{"generation":3,"level":30,"abilities":["pressure"],"moves":["swift","psychic","pursuit","knockoff"]},
-			{"generation":3,"level":70,"abilities":["pressure"],"moves":["cosmicpower","recover","psychoboost","hyperbeam"]}
-		],
+		eventOnly: true,
 		tier: "Uber"
 	}
 };

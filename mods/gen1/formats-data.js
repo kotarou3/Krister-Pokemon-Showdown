@@ -1,3 +1,5 @@
+'use strict';
+
 exports.BattleFormatsData = {
 	bulbasaur: {
 		randomBattleMoves: ["razorleaf","sleeppowder","swordsdance","bodyslam","toxic","leechseed"],
@@ -200,13 +202,13 @@ exports.BattleFormatsData = {
 		tier: "NU"
 	},
 	paras: {
-		randomBattleMoves: ["stunspore","swordsdance","bodyslam","slash","megadrain","doubleedge","growth","toxic"],
-		essentialMove: "spore",
+		randomBattleMoves: ["stunspore","swordsdance","spore","slash","megadrain","doubleedge","growth","toxic"],
+		essentialMove: "bodyslam",
 		tier: "LC"
 	},
 	parasect: {
-		randomBattleMoves: ["stunspore","swordsdance","bodyslam","slash","megadrain","doubleedge","growth","hyperbeam","toxic"],
-		essentialMove: "spore",
+		randomBattleMoves: ["stunspore","swordsdance","spore","slash","megadrain","doubleedge","growth","hyperbeam","toxic"],
+		essentialMove: "bodyslam",
 		tier: "NU"
 	},
 	venonat: {
@@ -676,6 +678,7 @@ exports.BattleFormatsData = {
 		eventPokemon: [
 			{"generation":1,"level":5,"moves":["pound"]}
 		],
+		eventOnly: true,
 		tier: "Uber"
 	}
 };

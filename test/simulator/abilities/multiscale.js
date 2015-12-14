@@ -1,5 +1,7 @@
-var assert = require('assert');
-var battle;
+'use strict';
+
+const assert = require('assert');
+let battle;
 
 describe('Multiscale', function () {
 	afterEach(function () {
@@ -10,28 +12,26 @@ describe('Multiscale', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: "Dragonite", ability: 'multiscale', moves: ['splash']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Gyarados", ability: 'moxie', moves: ['incinerate']}]);
-		var damage, curhp;
-		var pokemon = battle.p1.active[0];
-		battle.seed = [0, 0, 0, 1];
+		let damage, curhp;
+		let pokemon = battle.p1.active[0];
 		battle.commitDecisions();
 		damage = pokemon.maxhp - pokemon.hp;
 		curhp = pokemon.hp;
-		battle.seed = [0, 0, 0, 1];
+		battle.seed = battle.startingSeed.slice();
 		battle.commitDecisions();
 		assert.strictEqual(damage, battle.modify(curhp - pokemon.hp, 0.5));
 	});
 
-	it('should be ignored by Mold Breaker', function () {
+	it('should be suppressed by Mold Breaker', function () {
 		battle = BattleEngine.Battle.construct();
 		battle.join('p1', 'Guest 1', 1, [{species: "Dragonite", ability: 'multiscale', moves: ['splash']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Gyarados", ability: 'moldbreaker', moves: ['incinerate']}]);
-		var damage, curhp;
-		var pokemon = battle.p1.active[0];
-		battle.seed = [0, 0, 0, 1];
+		let damage, curhp;
+		let pokemon = battle.p1.active[0];
 		battle.commitDecisions();
 		damage = pokemon.maxhp - pokemon.hp;
 		curhp = pokemon.hp;
-		battle.seed = [0, 0, 0, 1];
+		battle.seed = battle.startingSeed.slice();
 		battle.commitDecisions();
 		assert.strictEqual(curhp - pokemon.hp, damage);
 	});
